@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="description" content="קורס אונליין פרקטי ללימוד Claude Code למתחילים. כל מה שצריך כדי להתחיל לעבוד בפועל, החל מ־180 ₪." />
   <title>קורס Claude Code למתחילים | קורס דיגיטלי</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,12 +21,27 @@
       <a class="logo" href="#" aria-label="Claude Code IL, דף הבית">
         <img class="logo-img" src="LOGO/logo.png" width="200" height="48" alt="" decoding="async" />
       </a>
-      <nav class="nav" aria-label="ניווט ראשי">
+      <nav class="nav" id="site-nav" aria-label="ניווט ראשי">
         <a href="#תוכן">מה לומדים</a>
         <a href="#למי">למי זה מתאים</a>
         <a href="#מחיר">הרשמה</a>
+        <a class="btn btn-ghost nav-mobile-cta" href="#מחיר">קבלו מקום</a>
       </nav>
       <a class="btn btn-ghost header-cta" href="#מחיר">קבלו מקום</a>
+      <button
+        type="button"
+        class="nav-toggle"
+        id="nav-toggle"
+        aria-expanded="false"
+        aria-controls="site-nav"
+        aria-label="פתיחה וסגירה של התפריט"
+      >
+        <span class="nav-toggle-box" aria-hidden="true">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </span>
+      </button>
     </div>
   </header>
 
