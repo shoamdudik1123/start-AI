@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="t">
+  <title id="t">№даў  кўзўўк ди’ўзЎ ’з’—е иўз</title>
+  <rect width="640" height="360" fill="#1a1a24"/>
+  <rect x="24" y="24" width="592" height="48" rx="8" fill="#2d2d3d" stroke="#5b5b7a"/>
+  <text x="40" y="54" fill="#a8a8c0" font-family="system-ui,sans-serif" font-size="14">=Ѕ landing-draft / index.html</text>
+  <rect x="24" y="88" width="592" height="248" rx="8" fill="#12121a" stroke="#3d3d55"/>
+  <text x="280" y="200" fill="#6b6b80" font-family="Consolas,monospace" font-size="13" text-anchor="middle">(иўз)</text>
+  <line x1="40" y1="120" x2="120" y2="120" stroke="#4a4a60" stroke-width="2" stroke-dasharray="6 4"/>
+</svg>

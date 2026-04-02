@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="t">
+  <title id="t">азшй  аеъе чебх тн ъелп бсйсй</title>
+  <rect width="640" height="360" fill="#1a1a24"/>
+  <rect x="24" y="24" width="592" height="48" rx="8" fill="#2d2d3d" stroke="#7c6bcf"/>
+  <text x="40" y="54" fill="#c4b5fd" font-family="system-ui,sans-serif" font-size="14">=С landing-draft / index.html</text>
+  <rect x="24" y="88" width="592" height="248" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="40" y="118" fill="#79c0ff" font-family="Consolas,monospace" font-size="12">&lt;!DOCTYPE html&gt;</text>
+  <text x="40" y="140" fill="#79c0ff" font-family="Consolas,monospace" font-size="12">&lt;html lang=&quot;he&quot; dir=&quot;rtl&quot;&gt;</text>
+  <text x="52" y="162" fill="#7ee787" font-family="Consolas,monospace" font-size="12">&lt;head&gt; ... &lt;/head&gt;</text>
+  <text x="52" y="184" fill="#7ee787" font-family="Consolas,monospace" font-size="12">&lt;body&gt;</text>
+  <text x="64" y="206" fill="#ffa657" font-family="Consolas,monospace" font-size="12">&lt;h1&gt;щмен темн&lt;/h1&gt;</text>
+  <text x="52" y="228" fill="#7ee787" font-family="Consolas,monospace" font-size="12">&lt;/body&gt;</text>
+</svg>
