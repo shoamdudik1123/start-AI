@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    { "source": "/course", "destination": "/course.html" },
+    { "source": "/course/", "destination": "/course.html" },
+    { "source": "/learn-tasks", "destination": "/learn-tasks.html" },
+    { "source": "/learn-tasks/", "destination": "/learn-tasks.html" },
+    { "source": "/learn", "destination": "/learn-tasks.html" },
+    { "source": "/learn/", "destination": "/learn-tasks.html" },
+    { "source": "/tasks", "destination": "/learn-tasks.html" },
+    { "source": "/tasks/", "destination": "/learn-tasks.html" }
+  ]
+}
