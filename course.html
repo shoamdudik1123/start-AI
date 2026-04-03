@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="description" content="אזור הקורס — שיעורים צעד אחר צעד עם מעקב התקדמות והקראה." />
+  <title>אזור הקורס | קוד קלוד למתחילים</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="course-page course-page-v2">
+  <div class="noise" aria-hidden="true"></div>
+  <div class="orb orb-a" aria-hidden="true"></div>
+  <div class="orb orb-b" aria-hidden="true"></div>
+
+  <header class="site-header course-header course-header-v2">
+    <div class="layout-shell site-header__row">
+      <a class="logo" href="/" aria-label="חזרה לעמוד המכירה">
+        <img class="logo-img" src="/LOGO/logo.png" width="200" height="48" alt="" decoding="async" />
+      </a>
+      <p class="course-header-tagline course-header-tagline-v2">קורס דיגיטלי · Heebo</p>
+    </div>
+  </header>
+
+  <main class="course-main layout-shell course-main-v2">
+    <div id="course-gate" class="course-gate glass-card">
+      <h1 class="course-gate-title">כניסה לאזור הקורס</h1>
+      <p class="course-gate-lead">
+        הזינו את קוד הגישה שנשלח אליכם אחרי השלמת הרכישה. לבדיקה:
+        <a class="course-inline-link" href="/course.html?preview=1">תצוגה מקדימה ללא קוד</a>.
+      </p>
+      <form id="gate-form" class="course-gate-form">
+        <label class="course-gate-label" for="gate-code">קוד גישה</label>
+        <input class="course-gate-input" id="gate-code" name="code" type="text" autocomplete="one-time-code" placeholder="מהמייל אחרי התשלום" required />
+        <p id="gate-error" class="course-gate-error" hidden role="alert"></p>
+        <button type="submit" class="btn btn-primary btn-block course-gate-submit">כניסה</button>
+      </form>
+      <p class="course-gate-foot">
+        <a class="course-inline-link" href="mailto:hello@example.com">תמיכה</a>
+      </p>
+    </div>
+
+    <div id="course-app" class="course-app course-app-v2" hidden>
+      <div class="course-reset-toolbar glass-card" id="course-reset-toolbar">
+        <button type="button" class="btn course-btn-reset-progress" id="course-btn-reset-progress">
+          איפוס התקדמות — התחלה מחדש
+        </button>
+        <p class="course-reset-toolbar-note">מוחק את השמירה המקומית (שיעורים, אימותים, מקום בפלייליסט) רק בדפדפן הזה</p>
+      </div>
+      <!-- בחירת רמה -->
+      <section id="course-entry" class="course-entry glass-card">
+        <p class="course-entry-eyebrow">ברוכים הבאים</p>
+        <h1 class="course-entry-title" id="course-brand-title">קוד קלוד למתחילים</h1>
+        <p class="course-entry-lead">
+          בחרו רמת פתיחה. בכל מסלול <strong>שמונה שיעורים</strong> ברצף — אחרי כל שיעור לוחצים <strong>המשך</strong>, וההתקדמות עולה.
+          בסוף המסלול תראו גם כמה סגרתם מכל <strong>24 שיעורי הקורס</strong>.
+        </p>
+        <div class="course-global-strip glass-card" aria-label="התקדמות בכל הקורס">
+          <p class="course-global-strip-title">התקדמות כוללת בקורס</p>
+          <div class="course-progress-track course-progress-track-v2">
+            <div id="course-progress-bar-global-only" class="course-progress-fill" style="width: 0%"></div>
+          </div>
+          <p id="course-progress-label-global-only" class="course-progress-label-strong">0 מתוך 24 שיעורים (0%)</p>
+        </div>
+        <div class="course-level-grid" role="group" aria-label="בחירת רמת קורס">
+          <button type="button" class="course-level-card course-level-card--beginner" data-track="beginner">
+            <span class="course-level-icon" aria-hidden="true">①</span>
+            <span class="course-level-name">למתחילים</span>
+            <span class="course-level-desc">מנוי Claude בדפדפן (~20$ לחודש בדרך כלל מספיק), תיקייה וקבצים, זרימת טיוטה מכלי אחר ואז קלוד — בלי עורך בתשלום נפרד</span>
+          </button>
+          <button type="button" class="course-level-card course-level-card--mid" data-track="advanced">
+            <span class="course-level-icon" aria-hidden="true">②</span>
+            <span class="course-level-name">למתקדמים</span>
+            <span class="course-level-desc">סקשנים, עיצוב, מובייל, תיקונים בפרויקט</span>
+          </button>
+          <button type="button" class="course-level-card course-level-card--pro" data-track="pro">
+            <span class="course-level-icon" aria-hidden="true">③</span>
+            <span class="course-level-name">למקצוענים</span>
+            <span class="course-level-desc">פיצ׳רים, מכירות, שדרוג קיים, שיטת עבודה מלאה</span>
+          </button>
+        </div>
+        <p class="course-entry-foot">
+          <a class="course-inline-link" href="/learn-tasks.html">תרגול נוסף — משימות צעד־אחר־צעד</a>
+        </p>
+      </section>
+
+      <!-- כיתה: פלייליסט + שיעור -->
+      <div id="course-classroom" class="course-classroom" hidden>
+        <div class="course-classroom-top glass-card">
+          <div class="course-classroom-top-row">
+            <button type="button" id="course-back-levels" class="btn btn-ghost course-back-btn">← החלפת מסלול</button>
+            <p id="course-track-label" class="course-track-label"></p>
+          </div>
+          <div class="course-progress course-progress-v2" aria-label="התקדמות במסלול הנוכחי">
+            <div class="course-progress-track course-progress-track-v2">
+              <div id="course-progress-bar-track" class="course-progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="course-progress-labels">
+              <p id="course-progress-label-track" class="course-progress-label course-progress-label-strong">0 מתוך 8 שיעורים במסלול (0%)</p>
+              <p id="course-progress-label-global" class="course-progress-label course-progress-label-sub">בקורס המלא: 0 מתוך 24 שיעורים</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-classroom-grid">
+          <aside id="course-playlist" class="course-playlist glass-card" aria-label="רשימת שיעורים — פלייליסט"></aside>
+          <div id="course-lesson-stage" class="course-lesson-stage glass-card">
+            <div id="course-lesson-inner"></div>
+          </div>
+        </div>
+      </div>
+
+      <details class="course-resources-fold glass-card">
+        <summary class="course-resources-summary">משאבים להעתקה (פרומפטים וצ׳קליסט)</summary>
+        <div id="bonus-list" class="course-bonus-grid course-bonus-grid-compact"></div>
+      </details>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>אזור הקורס · © <span id="year"></span> · <a class="course-inline-link" href="/">עמוד המכירה</a></p>
+  </footer>
+
+  <script src="/script.js"></script>
+  <script src="/course.js"></script>
+</body>
+</html>
