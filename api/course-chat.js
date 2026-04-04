@@ -62,7 +62,7 @@ async function courseChat(req, res) {
   }
 
   var model =
-    process.env.ANTHROPIC_MODEL || "claude-3-5-haiku-20241022";
+    process.env.ANTHROPIC_MODEL || "claude-3-haiku-20240307";
 
   var anthropicPayload = {
     model: model,
