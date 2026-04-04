@@ -3,11 +3,13 @@
 
   var PROGRESS_KEY_LEGACY = "claude_course_progress_v1";
   var STATE_KEY = "claude_course_state_v2";
-  /** לאיפוס התקדמות: פתחו course.html?reset-progress=1 (או ?reset=1) ואז רענון ללא הפרמטר. */
 
   var TOTAL_LESSONS_GLOBAL = 24;
   var TRACK_LEN = 8;
   var speechProgressInterval = null;
+
+  var PROMPT_HEBREW_SUFFIX =
+    "\n\nחשוב: כל מה שאתה כותב לי כאן בעברית בלבד (כולל קוד, הערות בתוך הקוד ושמות מקומיים).";
 
   var TRACKS = {
     beginner: {
@@ -27,549 +29,19 @@
     },
   };
 
-  var COURSE = {
-    title: "קוד קלוד למתחילים",
-    subtitle: "בונים בפועל · פרומפטים · דף נחיתה · תיקונים ומובייל",
-    modules: [
-      {
-        id: "m1",
-        title: "מודול 1 — מפת דרך וסט־אפ פרקטי",
-        summary: "תכל'ס: מנוי Claude (בסיסי ~20$ לחודש מספיק לרוב), תיקייה וקבצים על המחשב — הכול דרך claude.ai ללא עורך מתקדם חובה.",
-        lessons: [
-          {
-            id: "m1-l1",
-            title: "מה נלמד בקורס (פתיחה קצרה)",
-            durationMin: 6,
-            goal: "לדעת בדיוק לאן המסלול למתחילים לוקח: מנוי Claude בדפדפן ועד דף שעובד — קוד מ-Claude, שמירה לקבצים, פתיחה בדפדפן.",
-            onScreen: "שמונה צעדים: Claude (claude.ai) → תיקייה על המחשב → index.html → תצוגה בדפדפן → איך לכתוב לצ'אט → פרומפטים → זרימה (טיוטה מכלי אחר ואז קלוד מסיים קוד) → שלד מלא לדף.",
-            youDo: "כתבו משפט אחד: לאיזה אתר/עסק תרצו דף נחיתה (אפילו טיוטה).",
-            outcome: "יש לכם כיוון קונקרטי לשאר השיעורים — לא ”קורס כללי“.",
-            task: "שמרו את המשפט בפתק; נשתמש בו בשיעור עם הזרימה דו-שלבית (בינה אחרת + קלוד).",
-            pasteHint:
-              "👉 עכשיו: רשמו משפט אחד על דף הנחיתה (אפילו במחברות או בקובץ טקסט) — זה מספיק לשלב הזה.",
-            verify: {
-              title: "לפני ”המשך“ — האם ביצעתם?",
-              items: [
-                "יש לי משפט אחד ברור על האתר/העסק שאליו הדף אמור לשרת",
-                "שמרתי אותו במקום שאמצא בשיעור הבא (פתק / קובץ / הערה בטלפון)",
-              ],
-            },
-          },
-          {
-            id: "m1-l2",
-            title: "חשבון Claude ומנוי — מתחילים כאן",
-            durationMin: 12,
-            goal: "חשבון פעיל ב-Claude (claude.ai) + הבנה שמנוי בסיסי/Pro (בערך 20 דולר לחודש) מספיק לרוב לבניית אתר בשיעורים האלה.",
-            onScreen: "נרשמים, בוחרים תוכנית, נכנסים לצ'אט בדפדפן. אין צורך בהתקנת עורך מיוחד — רק דפדפן ואז בשיעורים הבאים תיקייה וקובץ טקסט.",
-            youDo: "1) כניסה ל-claude.ai והרשמה/התחברות. 2) הצטרפות לתוכנית בתשלום אם החינמי לא מספיק (בדקו את המחיר הנוכחי בעמוד התוכניות). 3) פתיחת שיחה חדשה וודאו שאתם רואים את חלון הצ'אט.",
-            outcome: "יש לכם גישה ל-Claude בדפדפן עם מספיק שימוש לעבודה על הפרויקט.",
-            task: "צילום מסך אחד: claude.ai עם צ'אט פתוח (אפשר לטשטש פרטים אישיים).",
-            pasteHint:
-              "👉 עכשיו: נכנסים ל-Claude, בודקים שמנוי/מגבלות מתאימים לכם — אז מסמנים אימות.",
-            verify: {
-              title: "אימות — האם הצליח?",
-              items: [
-                "אני מחובר/ת ל-claude.ai ורואה צ'אט שעובד",
-                "ידעתי/י איזו תוכנית יש לי (חינמי/משלם) וזה מספיק לי להתחיל את השיעורים",
-                "אין לי חובה להתקין שום עורך — רק דפדפן + בשלב הבא קובץ על המחשב",
-              ],
-            },
-            resources: [
-              {
-                label: "Claude — אתר וצ'אט",
-                url: "https://claude.ai/",
-                note: "כל העבודה עם קלוד כאן (מנוי בסדר גודל ~20$ לחודש בדרך כלל מספיק)",
-              },
-              {
-                label: "תוכניות ומחירים — Anthropic",
-                url: "https://www.anthropic.com/pricing",
-                note: "בדקו את המחיר המעודכן לפני רכישה",
-              },
-            ],
-          },
-          {
-            id: "m1-l3",
-            title: "תיקיית פרויקט וקובץ ראשון — תצוגה בדפדפן",
-            durationMin: 14,
-            goal: "תיקייה על המחשב, `index.html`, פתיחה בדפדפן או Live Server — כדי שכל קוד יהיה ניתן לראייה מיידית.",
-            onScreen: "במחשב: תיקייה חדשה, קובץ index.html שנפתח בכל עורך טקסט (נוטפד, VS Code חינמי וכו'), שמירה, גרירה לחלון דפדפן או ”פתח באמצעות“ → דפדפן.",
-            youDo: "צרו תיקייה `landing-draft` · קובץ `index.html` · הוסיפו `<h1>בדיקה</h1>` · שמרו · פתחו את הקובץ בדפדפן וראיתם את הכותרת.",
-            outcome: "מעגל סגור: עריכה → שמירה → תוצאה בדפדפן.",
-            task: "שנו את תוכן ה־h1, שמרו, רעננו — וודאו שהשינוי מופיע.",
-            pasteHint:
-              "👉 עכשיו: יוצרים תיקייה וקובץ index.html במחשב, עורכים בשורת נוטפד או כל עורך, שומרים — ואז פותחים את הקובץ בדפדפן. למטה אפשר גם לנסות את ”נסו בעצמכם“ בדף הקורס.",
-            verify: {
-              title: "אימות — האם רואים את האתר?",
-              items: [
-                "יש לי תיקייה landing-draft (או שם דומה) וקובץ index.html בתוכה",
-                "אחרי שמירה — פתיחת הקובץ בדפדפן או Live Server מראה את ה-h1",
-                "שינוי קטן + ריענון מעדכן את מה שאני רואה בדפדפן",
-              ],
-            },
-            taskCompare: {
-              title: "אותה משימה — לפני ואחרי",
-              before: "assets/lesson-compare/m1-l3-before.svg",
-              after: "assets/lesson-compare/m1-l3-after.svg",
-              captionBefore: "לפני: קובץ ריק בפרויקט",
-              captionAfter: "אחרי: אותו קובץ עם שלד HTML בסיסי",
-              altBefore: "איור: תיקייה וקובץ index ריק",
-              altAfter: "איור: אותו קובץ עם תגיות HTML",
-            },
-            tryIt: {
-              title: "נסו בעצמכם — עורך HTML",
-              subtitle:
-                "ערכו את הקוד, לחצו הרצה (או השאירו עדכון חי). בסגנון Try it Yourself כמו ב-W3Schools.",
-              htmlDefault:
-                '<!DOCTYPE html>\n<html lang="he" dir="rtl">\n<head>\n<meta charset="UTF-8">\n<title>הטסט שלי</title>\n<style>\n  body { font-family: system-ui, sans-serif; background:#1e1b2e; color:#e8e6f0; padding:1.5rem; }\n  h1 { color:#c4b5fd; }\n</style>\n</head>\n<body>\n  <h1>שלום מהקורס</h1>\n  <p>שנו את הכותרת או הוסיפו פסקה.</p>\n</body>\n</html>',
-            },
-            resources: [
-              {
-                label: "מדריך Live Server (הרחבה ב-VS Code)",
-                url: "https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer",
-                note: "אם משתמשים ב-VS Code — הרחבה נוחה לריענון אוטומטי",
-              },
-              {
-                label: "Netlify Drop — העלאת תיקייה לדמו",
-                url: "https://app.netlify.com/drop",
-                note: "אופציונלי, אם רוצים קישור חי בלי שרת מקומי",
-              },
-            ],
-          },
-          {
-            id: "m1-l4",
-            title: "שיחה ראשונה בצ'אט — רק אחרי שנכנסתם לכלי",
-            durationMin: 11,
-            goal: "להגיש בקשה אחת ברורה: מי אתם, מה נדרש, פלט מצופה — בלי לפרוס חמישה נושאים בהודעה אחת.",
-            onScreen: "בקשה גרועה: ”תבנה לי אתר יפה“. בקשה טובה: נושא העסק + סוג עמוד + סקשנים + שפה + מה לא לשנות.",
-            youDo: "ב-claude.ai שלחו בקשה אחת: שלושה סקשנים לדף הנחיתה של המשפט ששמרתם + טון כתיבה.",
-            outcome: "מבינים שצ'אט עובד כמו אפיון קצר לטכנאי — לא כמו קסם.",
-            task: "העתיקו את התשובה לקובץ טקסט בשם `prompt-draft.txt` בתיקיית הפרויקט.",
-            copyPrompt:
-              "אני בתרגיל מקורס. בנה עבורי טקסט אפיון בלבד (בלי קוד) לדף נחיתה בעברית, RTL, לנושא הבא:\n\n" +
-              "הנושא שלי: [הדביקו כאן את המשפט ששמרתם על העסק/הדף]\n\n" +
-              "דרישות:\n" +
-              "- שלושה סקשנים ברורים: לכל סקשן כותרת + שתי שורות תוכן לדוגמה\n" +
-              "- ציון טון כתיבה אחד (למשל מקצועי־חם)\n" +
-              "- הפלט: רק התוכן המסודר, בלי הקדמות ארוכות ושאלות המשך\n",
-            pasteHint:
-              "👉 עכשיו: לחצו ”העתק פרומפט“ → ב-claude.ai הדביקו → החליפו את שורת [הדביקו כאן…] במשפט האמיתי → שלחו.",
-            verify: {
-              title: "אימות — האם קיבלתם תשובה סבירה?",
-              items: [
-                "שלחתי בקשה אחת לפי הפרומפט (אחרי שהחלפתי את שורת הנושא)",
-                "קיבלתי לפחות שלושה סקשנים / כותרות עם תוכן",
-                "העתקתי את התשובה לקובץ prompt-draft.txt בתיקיית הפרויקט",
-              ],
-            },
-          },
-        ],
-      },
-      {
-        id: "m2",
-        title: "מודול 2 — פרומפטים וזרימת עבודה אמיתית",
-        summary: "תבנית להדבקה, ואז זרימה: בינה אחת לטיוטה → קלוד ב-claude.ai מיישם קוד שתשמרו ל-index.html.",
-        lessons: [
-          {
-            id: "m2-l1",
-            title: "תבנית פרומפט להעתקה — תכל'ס",
-            durationMin: 10,
-            goal: "שלד הודעה אחת שעובד: הקשר → תוצר → פורמט → מגבלות.",
-            onScreen: "חמש שורות קבועות: 1) למי הדף 2) מה נבנה 3) שפה וטון 4) רשימת סקשנים 5) מה אסור לשנות.",
-            youDo: "פתחו את `prompt-draft.txt`, מחקו את התרגיל הקודם, והדביקו את התבנית עם המילוי שלכם (דף הנחיתה מהשיעור הראשון).",
-            outcome: "יש לכם פרומפט ”מוכן להדבקה“ לכל סבב הבא.",
-            task: "שמרו גרסה שנייה של אותו פרומפט עם משפט מגבלה אחד: למשל ”בלי פלט מילולי — רק קוד“ או ההפך, לפי מה שתצטרכו בשיעור הבא.",
-            copyPrompt:
-              "הקשר: [למי הדף / מה העסק]\n" +
-              "תוצר: דף נחיתה בודד בעברית RTL — [נושא ספציפי]\n" +
-              "סקשנים נדרשים: Hero · 3 יתרונות · המלצות · FAQ (4 שאלות) · CTA\n" +
-              "טון: [למשל מקצועי־חם]\n" +
-              "מגבלות: בלי תמונות מ-URL חיצוני; בשלב זה בקשו אפיון מילולי/מבנה — לא קוד, אלא אם כבר ממשיכים לשיעור הבא.\n",
-            pasteHint:
-              "👉 עכשיו: לחצו ”העתק פרומפט“, הדביקו ב-claude.ai, מלאו את הסוגריים במילים שלכם ושמרו את התוצאה ב-prompt-draft.txt.",
-            verify: {
-              title: "אימות — האם יש לכם תבנית מלאה?",
-              items: [
-                "העתקתי את תבנית חמש השורות ומילאתי בה במקומות הריקים",
-                "הפרומפט המעודכן שמור ב-prompt-draft.txt (או מסמך אחר בתיקייה)",
-                "יש גם גרסה שנייה עם משפט מגבלה אחד — כפי שמופיע במשימה",
-              ],
-            },
-          },
-          {
-            id: "m2-l2",
-            title: "בינה אחת לטיוטת פרונט → קלוד ליישום בפרויקט",
-            durationMin: 14,
-            goal: "להריץ ב-ChatGPT / Gemini טיוטת HTML+CSS, ואז ב-claude.ai לבקש מקלוד לסדר/להשלים קוד, להעתיק ל-index.html (ו-styles.css אם יש) ולפתוח בדפדפן.",
-            onScreen: "צעדים: (א) פרומפט לכלי חיצוני. (ב) מעתיקים את כל קוד הפלט. (ג) ב-claude.ai — מדביקים את כפתור ”בקשה לקלוד“ + הטיוטה — מקבלים קוד מסודר, שומרים לקבצים ופותחים בדפדפן.",
-            youDo: "בצעו את שלושת הצעדים בפועל. אל תערכו ידנית את הקוד לפני שנתתם לקלוד לנסות.",
-            outcome: "זרימת עבודה: טיוטה מהירה מחוץ לפרויקט → ביצוע מסודר בתוך הפרויקט עם קוד קלוד.",
-            task: "רשמו במשפט אחד: איזה כלי חיצוני השתמשתם ומה קלוד שינה בקבצים לעומת הטיוטה.",
-            copyPrompts: [
-              {
-                label: "העתק — לכלי חיצוני (ChatGPT / Gemini)",
-                text:
-                  "אתה מומחה לפרונט בסיסי. תן שלד מלא אחד: HTML + CSS (אפשר <style> פנימי) לדף נחיתה בעברית, RTL.\n\n" +
-                  "הנושא והסקשנים לפי הפרומפט שלי כאן:\n\n" +
-                  "[הדביקו כאן את תוכן prompt-draft.txt המעודכן]\n\n" +
-                  "חובה במבנה: Hero, 3 יתרונות, המלצות (2), FAQ (4), CTA עם כפתור.\n" +
-                  "עיצוב נקי ורספונסיבי בסיסי.\n" +
-                  "פלט: רק קוד — בלי טקסט הסבר לפני ואחרי.\n",
-              },
-              {
-                label: "העתק — בקשה לקלוד (ב-claude.ai)",
-                text:
-                  "אני בונה דף נחיתה. להלן טיוטת HTML/CSS שקיבלתי ממודל אחר — מדביק אותה אחרי השורה ---טיוטה---.\n" +
-                  "משימה: תן לי קוד מלא ונקי לקובץ index.html (ואם צריך קובץ styles.css נפרד — תפרט מה שם). RTL, lang=he, כותרות לוגיות, בלי שגיאות ברורות. אל תוסיף הסברים — רק קוד, עם הוראה קצרה איך לשמור כל קובץ.\n\n" +
-                  "---טיוטה---\n" +
-                  "[מדביקים כאן את כל הפלט מהכלי החיצוני]\n",
-              },
-            ],
-            pasteHint:
-              "👉 שלב א: ”העתק — לכלי חיצוני“ → ChatGPT או Gemini → מחליפים את [הדביקו…] בפרומפט מ-prompt-draft.txt → שולחים. שלב ב: מעתיקים את כל קוד הפלט. שלב ג: ב-claude.ai — ”העתק — בקשה לקלוד“, מדביקים, ואז מדביקים את הטיוטה במקום [מדביקים כאן…] → שולחים → שומרים את הקוד לקבצים במחשב.",
-            verify: {
-              title: "אימות — האם סיימתם את כל השלבים?",
-              items: [
-                "הרצתי פרומפט בכלי חיצוני וקיבלתי שלד HTML/CSS",
-                "הדבקתי את הבקשה והטיוטה ב-claude.ai וקיבלתי מתוכו קוד מסודר",
-                "העתקתי את הקוד ל-index.html (ולאחרים אם הופיעו) ופתחתי בדפדפן — רואה דף",
-                "מילאתי את משימת השיעור במשפט אחד: איזה כלי חיצוני + מה קלוד שיפר",
-              ],
-            },
-            resources: [
-              {
-                label: "ChatGPT",
-                url: "https://chatgpt.com/",
-                note: "דוגמה לטיוטת פרונט טקסטואלית/קוד",
-              },
-              {
-                label: "Google Gemini",
-                url: "https://gemini.google.com/",
-                note: "חלופה לטיוטה ראשונית",
-              },
-            ],
-          },
-          {
-            id: "m2-l3",
-            title: "טעויות נפוצות",
-            durationMin: 8,
-            goal: "לזהות לפני השגיאה: בקשה כללית, יותר מדי במכה, בלי הקשר.",
-            onScreen: "רשימת ”אל תעשו ככה“ + תיקון מהיר לכל אחת.",
-            youDo: "סמנו איזו טעות הכי מוכרת לכם — ותיקונו אותה בפרומפט הבא.",
-            outcome: "פחות ”למה הוא לא הבין אותי“.",
-            task: "פרקו בקשה גדולה לשתי הודעות קטנות לדוגמה.",
-          },
-          {
-            id: "m2-l4",
-            title: "תרגול פרומפטים אמיתי",
-            durationMin: 12,
-            goal: "שלוש דוגמאות: דף נחיתה, רכיב באתר, תיקון באג.",
-            onScreen: "מעתיקים פרומפטים, מתאימים לעסק, מריצים, משווים תוצאות.",
-            youDo: "בחרו דוגמה אחת והריצו עד תוצאה סבירה (גם אם לא מושלמת).",
-            outcome: "ידיים חמות לפני מודול הבנייה.",
-            task: "שמרו בקובץ טקסט 3 פרומפטים שעבדו לכם — זה המאגר האישי שלכם.",
-          },
-        ],
-      },
-      {
-        id: "m3",
-        title: "מודול 3 — דף נחיתה מהפרויקט בפועל",
-        summary: "אותה תיקייה על המחשב: קוד מ-Claude → שמירה לקבצים → ריענון בדפדפן.",
-        lessons: [
-          {
-            id: "m3-l1",
-            title: "הפרויק트 על המחשב — תיקייה וקבצים",
-            durationMin: 9,
-            goal: "לדעת איפה נמצאת תיקיית הפרויקט, לערוך index.html בעורך פשוט ולפתוח את הקובץ בדפדפן אחרי כל שינוי.",
-            onScreen: "סייר הקבצים → הכנסה לתיקייה → לחיצה ימנית על index.html → עריכה (נוטפד וכו') → שמירה → פתיחה מחדש בדפדפן או ריענון.",
-            youDo: "גלו שאתם מוצאים את תיקיית landing-draft · פתחו בה את index.html · שינוי קטן ושמירה · ריענון בדפדפן.",
-            outcome: "מעגל ברור: קוד מ-Claude → שמירה לקובץ → בדיקה בדפדפן.",
-            task: "צרו תיקיית `assets` (ריקה) אם עדיין אין — קלוד יזכיר אותה כשתבקשו תמונות.",
-            pasteHint:
-              "👉 עכשיו: גלו לתיקיית הפרויקט במחשב — אותה תיקייה מהשיעורים הקודמים — וודאו שאתם יודעים איך לערוך ולשחק קובץ.",
-            verify: {
-              title: "אימות — הפרויקט נטען?",
-              items: [
-                "אני יודע/ת איפה תיקיית landing-draft ואיפה index.html על המחשב",
-                "עריכה + שמירה + ריענון בדפדפן עבדו לי אחרי שינוי קטן",
-              ],
-            },
-            resources: [],
-          },
-          {
-            id: "m3-l2",
-            title: "שלד הדף — מהפרומפט שלכם לקבצים",
-            durationMin: 12,
-            goal: "בקשה אחת ב-claude.ai: ליישם את הפרומפט מ־prompt-draft.txt (או טיוטה מכלי חיצוני) כ־HTML/CSS, ואז להעתיק לקבצים בתיקייה.",
-            onScreen: "ב-claude.ai: מדביקים את בקשת השיעור + את התוכן ליישום → מקבלים קוד → מעתיקים ל-index.html (ו־CSS אם צריך) → פותחים בדפדפן.",
-            youDo: "ב-claude.ai: הדביקו את תבנית m2-l1 או פלט מ־ChatGPT/Gemini, ובקשו שלד עם לפחות 5 אזורים (section/div) ו־RTL; שמרו את הקוד לקבצים.",
-            outcome: "דף שנפתח בדפדפן עם מבנה אמיתי, לא רק טקסט בצ'אט.",
-            task: "ספרו בשני משפטים: האם המבנה תואם את מה שביקשתם מהבינה החיצונית — מה עוד דורש סבב נוסף?",
-            copyPrompt:
-              "משימה: ליישם את האפיון/הטיוטה הבאה כ־HTML + CSS מלאים (קובץ אחד עם <style> או קבצים נפרדים — ציין בהוראה קצרה איך לשמור).\n" +
-              "דרישות: לפחות 5 אזורי section או div ברורים, lang=he ו-dir=rtl, כותרות הגיוניות, קוד בלבד בלי נאום.\n\n" +
-              "להלן התוכן ליישום:\n\n" +
-              "[הדביקו כאן את תוכן prompt-draft.txt או את טיוטת ה-HTML/CSS]\n",
-            pasteHint:
-              "👉 עכשיו: ”העתק פרומפט“ → החליפו את [הדביקו…] → claude.ai → שליחה → העתקת הקוד ל-index.html וקבצים נוספים אם הופיעו → פתיחה בדפדפן.",
-            verify: {
-              title: "אימות — האם יש שלד בקבצים?",
-              items: [
-                "קיבלתי מקלוד ב-claude.ai קוד מלא והדבקתי אותו לקבצים בתיקייה",
-                "יש לפחות 5 אזורים מובחנים ב-HTML",
-                "הדף נטען בדפדפן ואני רואה מבנה קריא (גם אם העיצוב עדיין גולמי)",
-              ],
-            },
-            taskCompare: {
-              title: "מבולגן לעומת שלד מסודר",
-              before: "assets/lesson-compare/m3-l2-before.svg",
-              after: "assets/lesson-compare/m3-l2-after.svg",
-              captionBefore: "לפני: רעיונות בלי סדר",
-              captionAfter: "אחרי: סקשנים לפי זרימה",
-              altBefore: "איור: רעיונות מפוזרים לדף נחיתה",
-              altAfter: "איור: מבנה סקשנים ב-HTML",
-            },
-            tryIt: {
-              title: "נסו בעצמכם — שלד דף נחיתה",
-              subtitle: "הריצו וראו איך הסקשנים נראים בדפדפן. שחקו עם הטקסטים.",
-              htmlDefault:
-                '<!DOCTYPE html>\n<html lang="he" dir="rtl">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>דף נחיתה — דמו</title>\n<style>\n  * { box-sizing: border-box; }\n  body { font-family: system-ui, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; line-height: 1.6; }\n  section { max-width: 40rem; margin: 0 auto; padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; }\n  h1 { font-size: 1.75rem; margin: 0 0 0.5rem; }\n  h2 { font-size: 1.1rem; color: #4f46e5; margin: 0 0 0.35rem; }\n  .hero { background: linear-gradient(135deg, #1e1b4b, #312e81); color: #e0e7ff; text-align: center; padding: 2rem 1rem; }\n  .cta { background: #4f46e5; color: #fff; text-align: center; }\n  .cta a { color: #fff; font-weight: 700; }\n</style>\n</head>\n<body>\n  <header class="hero">\n    <h1>כותרת ראשית</h1>\n    <p>משפט שמסביר במה עסק התוכן.</p>\n  </header>\n  <section><h2>יתרונות</h2><p>שלושה נקודות קצרות על הערך.</p></section>\n  <section><h2>המלצות</h2><p>ציטוט או לוגו לקוח.</p></section>\n  <section><h2>שאלות נפוצות</h2><p>שאלה ותשובה לדוגמה.</p></section>\n  <section class="cta"><h2>יצירת קשר</h2><p><a href="#">וואטסאפ</a></p></section>\n</body>\n</html>',
-            },
-          },
-          {
-            id: "m3-l3",
-            title: "סידור סקשנים: Hero עד CTA",
-            durationMin: 10,
-            goal: "Hero, יתרונות, למי זה, המלצות, FAQ, קריאה לפעולה.",
-            onScreen: "מבקשים מהקלוד להוסיף/לסדר סקשנים בלי לשבור את השאר.",
-            youDo: "אשרו סדר סקשנים בפרומפט ועדכנו טקסטים לעסק שלכם.",
-            outcome: "זרימת מסירת מסר הגיונית מלמעלה למטה.",
-            task: "בדקו שבכל סקשן יש כותרת ברורה אחת לפחות.",
-          },
-          {
-            id: "m3-l4",
-            title: "שיפור עיצוב",
-            durationMin: 12,
-            goal: "צבעים, מרווחים, פונטים, כפתורים, היררכיה.",
-            onScreen: "בקשות קצרות: פלטת צבעים, ריווח אחיד, כפתור בולט.",
-            youDo: "בחרו צבע ראשי ומשני ובקשו להחיל בצורה עקבית.",
-            outcome: "דף שנראה מקצועי יותר גם בלי עיצוב ”מטורף“.",
-            task: "הגדילו ניגודיות בכפתור הראשי בודקים גם במובייל.",
-          },
-          {
-            id: "m3-l5",
-            title: "התאמה למובייל",
-            durationMin: 11,
-            goal: "בדיקה ב-DevTools, תיקון שבירות, בקשות רספונסיביות ממוקדות.",
-            onScreen: "צמצום רוחב, גלילה, טקסטים ארוכים, תפריט אם יש.",
-            youDo: "בקשו: ”תקן רספונסיביות רק לרוחב מתחת ל-600px, בלי לשנות דסקטופ“.",
-            outcome: "דף נקרא ונוח בטלפון.",
-            task: "צלמו מסך מובייל של ה-Hero אחרי התיקון.",
-          },
-          {
-            id: "m3-l6",
-            title: "טפסים, כפתורים וקריאה לפעולה",
-            durationMin: 10,
-            goal: "כפתור WhatsApp, טופס בסיסי, או קישור להרשמה.",
-            onScreen: "קישור `wa.me`, או `mailto:`, או טופס `form` פשוט + הערה על שליחה אמיתית.",
-            youDo: "הוסיפו פעולה אחת ברורה — לחיצה אחת שמובילה לצעד הבא.",
-            outcome: "דף שלא רק ”יפה“ אלא מבקש פעולה.",
-            task: "בדקו שלחיצה פותחת את היעד הנכון בטאב חדש אם צריך.",
-          },
-        ],
-      },
-      {
-        id: "m4",
-        title: "מודול 4 — עבודה חכמה בתוך הפרויקט",
-        summary: "תיקונים, שינויים מבוקתים, סידור קוד, פיצ'רים קטנים.",
-        lessons: [
-          {
-            id: "m4-l1",
-            title: "איך לתקן באגים עם קלוד",
-            durationMin: 10,
-            goal: "להעתיק שגיאה, לתאר צעדים, לבקש תיקון בלי ”לשרוף“ הכול.",
-            onScreen: "קונסולת דפדפן, הודעת שגיאה, הקשר: איזה קובץ ומה ניסיתם.",
-            youDo: "פתחו באג קטן בכוונה (למשל שם קלאס) ותקנו עם בקשה ממוקדת.",
-            outcome: "זרימת דיבאג שחוזרת על עצמה בכל פרויקט.",
-            task: "רשמו תבנית: ”השגיאה + מה מצופה + מה לא לגעת“.",
-          },
-          {
-            id: "m4-l2",
-            title: "שינויים בלי שהכול מתפרק",
-            durationMin: 9,
-            goal: "הגבלת היקף: ”שנה רק את אזור ההמלצות“.",
-            onScreen: "פרומפט עם גבולות + ”אל תשנה קבצים שלא צוינו“.",
-            youDo: "בקשו החלפת קטע טקסט בלי לגעת ב-CSS הגלובלי.",
-            outcome: "פחות רגרסיות.",
-            task: "בדקו ב-git או בהשוואת קבצים אם יש לכם — אם לא, שמרו עותק לפני שינוי גדול.",
-          },
-          {
-            id: "m4-l3",
-            title: "מקוד מבולגן למסודר",
-            durationMin: 10,
-            goal: "חלוקה לקבצים, שמות ברורים, הערות מינימליות.",
-            onScreen: "`styles.css` נפרד, קומפוננטות לוגיות, מחיקת כפילויות.",
-            youDo: "בקשו ריפקטור קטן: העברת סגנונות או איחוד כפילויות.",
-            outcome: "פרויקט קל יותר להמשך עבודה.",
-            task: "ודאו שיש רק ערוץ אחד לצבע ראשי (משתנה CSS או הערה).",
-          },
-          {
-            id: "m4-l4",
-            title: "פיצ'רים קטנים",
-            durationMin: 12,
-            goal: "FAQ נפתח, גלריה, המלצות, טיימר, טבלת מחירים — אחד בכל פעם.",
-            onScreen: "בחירת פיצ'ר אחד, איפיון קצר, יישום, בדיקה.",
-            youDo: "הוסיפו פיצ'ר אחד שמתאים לדף הנחיתה שלכם.",
-            outcome: "תחושה שאפשר לבנות ”לגו“ של בלוקים.",
-            task: "עדכנו את הפרומפט האישי שלכם ל”הוספת בלוק דומה בעתיד“.",
-          },
-        ],
-      },
-      {
-        id: "m5",
-        title: "מודול 5 — שימושים שמוכרים את הקורס",
-        summary: "דפי מכירה, אתר שירות, תוכן, ושדרוג אתר קיים.",
-        lessons: [
-          {
-            id: "m5-l1",
-            title: "דף מכירה לקורס דיגיטלי",
-            durationMin: 14,
-            goal: "מבנה שמוכר: בעיה, תוצאה, סילבוס, עדות, השכרת מחיר, שאלות, רכישה.",
-            onScreen: "התאמה של דף הנחיתה לשפה של קורסים.",
-            youDo: "בנו גרסה אחת מלאה לקורס אמיתי או לדוגמה.",
-            outcome: "נכס שאפשר לשלוח ללקוח או להשתמש בעצמכם.",
-            task: "שלחו את הקישור המקומי/הדמו לחבר לביקורת קריאה.",
-          },
-          {
-            id: "m5-l2",
-            title: "אתר שירות פשוט (סטודיו / עסק מקומי)",
-            durationMin: 13,
-            goal: "3–5 עמודים או עמוד בודד עם ניווט עוגנים לפי הצורך.",
-            onScreen: "דף בית, שירותים, אודות, צור קשר — או סקשנים באחד.",
-            youDo: "התאימו לעסק: שעות, אזור שירות, זכויות יצירת קשר.",
-            outcome: "אתר ״מספיק טוב״ להעלאה מהירה.",
-            task: "הוסיפו פס קטן של אמון: וותק, ביטוח, או מספר רישוי אם רלוונטי.",
-          },
-          {
-            id: "m5-l3",
-            title: "תוכן לאתר עם קלוד",
-            durationMin: 10,
-            goal: "כותרות, תיאורי מוצר, FAQ, טקסטים לכפתורים, טיוטות SEO.",
-            onScreen: "פרומפטי תוכן נפרדים מהקוד; הדבקה לעמוד.",
-            youDo: "ייצרו סט FAQ של 8 שאלות בעברית טבעית.",
-            outcome: "פחות בורות בכתיבה, יותר מהירות.",
-            task: "ערכו ידנית משפט אחד שחייב להיות בקול שלכם בלבד.",
-          },
-          {
-            id: "m5-l4",
-            title: "שדרוג פרויקט קיים",
-            durationMin: 12,
-            goal: "לייבא קוד קיים, למפות, לבקש שינוי מבוקר.",
-            onScreen: "תיאור המבנה לקלוד, רשימת קבצים, מה מותר לשנות.",
-            youDo: "קחו פרויקט ישן או תבנית ושדרגו חלק אחד (ביצועים/נגישות/מובייל).",
-            outcome: "ביטחון שלא חייבים להתחיל מאפס.",
-            task: "תעדו במשפט אחד מה הייתה נקודת החולשה המרכזית לפני השדרוג.",
-          },
-        ],
-      },
-      {
-        id: "m6",
-        title: "מודול 6 — לעבוד כמו מקצוען + העלאה",
-        summary: "מתודולוגיה מלאה, איכות עקבית, וסגירת המעגל באוויר.",
-        lessons: [
-          {
-            id: "m6-l1",
-            title: "שיטת עבודה מלאה",
-            durationMin: 11,
-            goal: "מטרה → מבנה → עיצוב → תיקונים → מובייל → העלאה.",
-            onScreen: "צ'קליסט מודפס/דיגיטלי שעוברים לפניו בכל דף.",
-            youDo: "הריצו את הצ'קליסט על דף הנחיתה שלכם וסמנו מה חסר.",
-            outcome: "פחות דילוגים אקראיים.",
-            task: "קבעו ”הגדרת הושלמה“ למשימה: כל סעיף בצ'קליסט ירוק.",
-          },
-          {
-            id: "m6-l2",
-            title: "תוצאה ברמה גבוהה בכל פעם",
-            durationMin: 12,
-            goal: "שלבים, גרסאות, בדיקה ויזואלית, לא לרוץ קדימה.",
-            onScreen: "דוגמאות לפני/אחרי, ושימוש בפרומפט ” polishing “ אחד לסוף.",
-            youDo: "בצעו סבב אחד של ”ליטוש“: ניגודיות, מרווחים, מיקרו-קופי.",
-            outcome: "סגירת קורס עם פרויקט שאתם גאים להראות.",
-            task: "העלו גרסה ל-Hosting (Netlify / GitHub Pages / השרת שלכם) או הכינו ZIP לספק.",
-          },
-        ],
-      },
-    ],
-    bonuses: {
-      title: "בונוסים",
-      items: [
-        {
-          title: "מאגר פרומפטים (העתקה מהירה)",
-          body:
-            "דף נחיתה: ”אתה מומחה לדפי נחיתה בעברית. בנה דף בודד (HTML+CSS) ל-[נישה]. סקשנים: Hero עם כותרת משנה, 3 יתרונות עם אייקון טקסטואלי, למי זה מתאים (רשימה), 3 המלצות (שם+משפט), FAQ של 6 שאלות, CTA כפול. עיצוב נקי, RTL, נגישות בסיסית (כפתורים גדולים, ניגודיות). אל תשתמש בתמונות חיצוניות.“\n\n" +
-            "שיפור עיצוב: ”שפר רק את ה-CSS: טיפוגרפיה ומרווחים. אל תשנה מבנה ה-HTML. שמור RTL.“\n\n" +
-            "מובייל: ”תקן breakpoint עד 640px: גלישת טקסט, ריווח אנכי, כפתורים ברוחב מלא. אל תשנה דסקטופ.“\n\n" +
-            "תוכן: ”כתוב בקול מקצועי-חם בעברית: כותרת ראשית, 5 כותרות משנה, טקסט לכפתור CTA, ו-8 שאלות FAQ על [נושא].“\n\n" +
-            "פיצ'ר: ”הוסף FAQ עם details/summary ב-HTML בלבד, סגנון מינימלי ב-CSS, בלי JS.“",
-        },
-        {
-          title: "צ'קליסט עבודה",
-          body:
-            "□ תיקייה ושם פרויקט ברורים\n" +
-            "□ תצוגה בדפדפן עובדת\n" +
-            "□ שלד סקשנים מוסכם\n" +
-            "□ טקסטים אמיתיים (לא lorem בשלב סיום)\n" +
-            "□ כפתור/טופס/וואטסאפ — בודקים לחיצה\n" +
-            "□ מובייל — עוברים על כל הסקשנים\n" +
-            "□ מהירות בסיסית — תמונות מכווצות אם יש\n" +
-            "□ העלאה / גיבוי לפני שיתוף עם לקוח",
-        },
-        {
-          title: "תזכורות קצרות",
-          body:
-            "• משימה אחת בהודעה כשאפשר\n" +
-            "• תמיד לצרף: מטרה + מגבלות (מה לא לגעת)\n" +
-            "• אחרי שינוי גדול — רענון וודאי בדפדפן\n" +
-            "• שמרו עותק לפני ”תא פרויקט מחדש“\n" +
-            "• אם משהו נשבר — חזרה צעד אחורה ולא ”מנהיגת כאוס“",
-        },
-      ],
-    },
-  };
-
-  var currentTrackKey = null;
-  var activeLessonIndex = 0;
-
-  function $(sel, root) {
-    return (root || document).querySelector(sel);
+  var COURSE = window.COURSE;
+  if (!COURSE || !COURSE.modules) {
+    console.error("course-data.js חסר או לא תקין: ציפיתי ל־window.COURSE.modules");
+    return;
   }
 
-  function escapeHtml(s) {
-    return String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
-  function resetAllCourseProgress() {
-    try {
-      localStorage.removeItem(STATE_KEY);
-      localStorage.removeItem(PROGRESS_KEY_LEGACY);
-    } catch (eR) {}
-  }
-
-  function stripResetProgressQuery() {
-    var p = new URLSearchParams(location.search);
-    if (p.get("reset-progress") !== "1" && p.get("reset") !== "1") return false;
-    resetAllCourseProgress();
-    p.delete("reset-progress");
-    p.delete("reset");
-    var qs = p.toString();
-    var url = location.pathname + (qs ? "?" + qs : "") + location.hash;
-    try {
-      history.replaceState(null, "", url);
-    } catch (eH) {}
-    return true;
+  function defaultState() {
+    return {
+      trackId: null,
+      currentLessonId: null,
+      completedLessonIds: [],
+      verifyByLesson: {},
+    };
   }
 
   function loadState() {
@@ -577,26 +49,23 @@
       var raw = localStorage.getItem(STATE_KEY);
       if (raw) {
         var o = JSON.parse(raw);
-        if (o && typeof o.completed === "object") {
-          if (!o.verify || typeof o.verify !== "object") o.verify = {};
+        if (o && typeof o === "object") {
+          o.completedLessonIds = Array.isArray(o.completedLessonIds) ? o.completedLessonIds : [];
+          o.verifyByLesson = o.verifyByLesson && typeof o.verifyByLesson === "object" ? o.verifyByLesson : {};
           return o;
         }
       }
+    } catch (e) {}
+    try {
       var leg = localStorage.getItem(PROGRESS_KEY_LEGACY);
       if (leg) {
         var old = JSON.parse(leg);
-        if (old && typeof old === "object") {
-          var completed = {};
-          Object.keys(old).forEach(function (k) {
-            if (old[k]) completed[k] = true;
-          });
-          var s = { completed: completed, activeTrack: null, activeIndex: 0, verify: {} };
-          saveState(s);
-          return s;
-        }
+        var st = defaultState();
+        if (old && Array.isArray(old.completedLessonIds)) st.completedLessonIds = old.completedLessonIds;
+        return st;
       }
-    } catch (e) {}
-    return { completed: {}, activeTrack: null, activeIndex: 0, verify: {} };
+    } catch (e2) {}
+    return defaultState();
   }
 
   function saveState(state) {
@@ -605,829 +74,960 @@
     } catch (e) {}
   }
 
-  function getCompleted() {
-    return loadState().completed || {};
+  var state = loadState();
+  var assistantChatHistory = [];
+
+  function findLesson(lessonId) {
+    for (var mi = 0; mi < COURSE.modules.length; mi++) {
+      var mod = COURSE.modules[mi];
+      for (var li = 0; li < mod.lessons.length; li++) {
+        if (mod.lessons[li].id === lessonId) return { lesson: mod.lessons[li], module: mod };
+      }
+    }
+    return null;
   }
 
-  function setLessonDone(lessonId, done) {
-    var st = loadState();
-    st.completed = st.completed || {};
-    if (done) st.completed[lessonId] = true;
-    else delete st.completed[lessonId];
-    saveState(st);
+  function getTrack() {
+    if (!state.trackId || !TRACKS[state.trackId]) return null;
+    return TRACKS[state.trackId];
   }
 
-  function getEffectiveVerify(les) {
-    if (les.verify && les.verify.items && les.verify.items.length) return les.verify;
-    return {
-      title: 'לפני "המשך" — אימות קצר',
-      items: [
-        "ביצעתי את משימת השיעור בפועל (לא רק קראתי), ורק עכשיו אני מסמן/ה.",
-      ],
+  function trackIndex(lessonId) {
+    var tr = getTrack();
+    if (!tr) return -1;
+    return tr.lessonIds.indexOf(lessonId);
+  }
+
+  function isLessonUnlocked(lessonId) {
+    var tr = getTrack();
+    if (!tr) return false;
+    var idx = tr.lessonIds.indexOf(lessonId);
+    if (idx < 0) return false;
+    if (idx === 0) return true;
+    return state.completedLessonIds.indexOf(tr.lessonIds[idx - 1]) !== -1;
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function appendSuffix(text) {
+    return String(text || "") + _promptSuffixForText(text);
+  }
+
+  function _promptSuffixForText(text) {
+    var t = String(text || "");
+    if (t.indexOf("בעברית בלבד") !== -1 && t.indexOf("הערות בתוך הקוד") !== -1) return "";
+    return PROMPT_HEBREW_SUFFIX;
+  }
+
+  function copyPlain(text, toastEl) {
+    var full = appendSuffix(text);
+    function ok() {
+      if (toastEl) {
+        toastEl.textContent = "הועתק";
+        setTimeout(function () {
+          if (toastEl.textContent === "הועתק") toastEl.textContent = "";
+        }, 2200);
+      }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(full).then(ok).catch(function () {
+        fallbackCopy(full, ok);
+      });
+    } else fallbackCopy(full, ok);
+  }
+
+  function fallbackCopy(text, done) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      if (done) done();
+    } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  function stopSpeech() {
+    if (speechProgressInterval) {
+      clearInterval(speechProgressInterval);
+      speechProgressInterval = null;
+    }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    document.querySelectorAll(".course-audio-row").forEach(function (row) {
+      row.classList.remove("is-playing");
+    });
+    document.querySelectorAll(".course-audio-progress-fill").forEach(function (fill) {
+      fill.style.width = "0%";
+    });
+  }
+
+  function speechEstimateSeconds(lesson) {
+    var t = [
+      lesson.title,
+      lesson.goal,
+      lesson.onScreen,
+      lesson.youDo,
+      lesson.outcome,
+      lesson.task,
+      lesson.pasteHint,
+    ]
+      .filter(Boolean)
+      .join(" ");
+    return Math.min(240, Math.max(25, Math.floor(t.length / 11)));
+  }
+
+  function startSpeechForLesson(lesson, audioRow) {
+    stopSpeech();
+    if (!window.speechSynthesis) return;
+    var parts = [
+      lesson.title,
+      lesson.goal,
+      lesson.onScreen,
+      lesson.youDo,
+      lesson.outcome,
+      lesson.task,
+    ].filter(Boolean);
+    var text = parts.join(". ");
+    if (!text) return;
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = "he-IL";
+    u.rate = 0.98;
+    audioRow.classList.add("is-playing");
+    var fill = audioRow.querySelector(".course-audio-progress-fill");
+    var timerEl = audioRow.querySelector(".course-audio-timer");
+    var total = speechEstimateSeconds(lesson);
+    var start = Date.now();
+    speechProgressInterval = setInterval(function () {
+      var elapsed = (Date.now() - start) / 1000;
+      var p = Math.min(100, (elapsed / total) * 100);
+      if (fill) fill.style.width = p + "%";
+      if (timerEl) timerEl.textContent = formatTime(elapsed);
+    }, 200);
+    u.onend = function () {
+      stopSpeech();
+      if (fill) fill.style.width = "100%";
+      if (timerEl) timerEl.textContent = formatTime(total);
     };
+    u.onerror = function () {
+      stopSpeech();
+    };
+    window.speechSynthesis.speak(u);
   }
 
-  function getVerifyChecks(lessonId, itemCount) {
-    var st = loadState();
-    var bag = st.verify && typeof st.verify === "object" ? st.verify[lessonId] : null;
-    var arr = [];
-    for (var i = 0; i < itemCount; i++) {
-      arr[i] = !!(bag && bag[String(i)]);
+  function formatTime(sec) {
+    sec = Math.floor(sec);
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  function waveBarsHtml(n) {
+    var out = "";
+    for (var i = 0; i < n; i++) {
+      var h = 18 + ((i * 7) % 45);
+      out += '<span class="course-wave-bar" style="height:' + h + '%"></span>';
+    }
+    return out;
+  }
+
+  function createLessonAudioRow() {
+    var wrap = document.createElement("div");
+    wrap.className = "course-audio-row";
+    wrap.innerHTML =
+      '<div class="course-audio-wave-shell"><div class="course-waveform--full">' +
+      waveBarsHtml(40) +
+      '</div><div class="course-audio-progress-line"><div class="course-audio-progress-fill"></div></div>' +
+      '<div class="course-audio-controls">' +
+      '<button type="button" class="btn course-audio-listen" data-action="speak">הקראת השיעור</button>' +
+      '<button type="button" class="btn course-audio-stop" data-action="stop-speak">עצור</button>' +
+      '<span class="course-audio-timer">0:00</span>' +
+      "</div></div>";
+    return wrap;
+  }
+
+  function allVerifyChecked(lesson) {
+    if (!lesson.verify || !lesson.verify.items || !lesson.verify.items.length) return true;
+    var arr = getVerifyArray(lesson.id, lesson.verify.items.length);
+    for (var i = 0; i < arr.length; i++) if (!arr[i]) return false;
+    return true;
+  }
+
+  function getVerifyArray(lessonId, n) {
+    if (!state.verifyByLesson[lessonId]) state.verifyByLesson[lessonId] = [];
+    var arr = state.verifyByLesson[lessonId];
+    if (arr.length !== n) {
+      arr = [];
+      for (var i = 0; i < n; i++) arr.push(false);
+      state.verifyByLesson[lessonId] = arr;
     }
     return arr;
   }
 
-  function setVerifyCheck(lessonId, index, checked) {
-    var st = loadState();
-    st.verify = st.verify && typeof st.verify === "object" ? st.verify : {};
-    st.verify[lessonId] = st.verify[lessonId] && typeof st.verify[lessonId] === "object" ? st.verify[lessonId] : {};
-    st.verify[lessonId][String(index)] = !!checked;
-    saveState(st);
+  function countTrackDone() {
+    var tr = getTrack();
+    if (!tr) return 0;
+    var c = 0;
+    for (var i = 0; i < tr.lessonIds.length; i++) {
+      if (state.completedLessonIds.indexOf(tr.lessonIds[i]) !== -1) c++;
+    }
+    return c;
   }
 
-  function allVerifyChecked(lessonId, les) {
-    var v = getEffectiveVerify(les);
-    var arr = getVerifyChecks(lessonId, v.items.length);
-    for (var i = 0; i < v.items.length; i++) {
-      if (!arr[i]) return false;
+  function updateProgressUi() {
+    var g = state.completedLessonIds.length;
+    var pctG = Math.round((g / TOTAL_LESSONS_GLOBAL) * 100);
+    var barG = document.getElementById("course-progress-bar-global-only");
+    var lblG = document.getElementById("course-progress-label-global-only");
+    if (barG) barG.style.width = pctG + "%";
+    if (lblG) lblG.textContent = g + " מתוך " + TOTAL_LESSONS_GLOBAL + " שיעורים (" + pctG + "%)";
+
+    var tr = getTrack();
+    var barT = document.getElementById("course-progress-bar-track");
+    var lblT = document.getElementById("course-progress-label-track");
+    var lblGlob = document.getElementById("course-progress-label-global");
+    if (tr) {
+      var td = countTrackDone();
+      var pctT = Math.round((td / TRACK_LEN) * 100);
+      if (barT) barT.style.width = pctT + "%";
+      if (lblT) lblT.textContent = td + " מתוך " + TRACK_LEN + " שיעורים במסלול (" + pctT + "%)";
     }
-    return true;
+    if (lblGlob) lblGlob.textContent = "בקורס המלא: " + g + " מתוך " + TOTAL_LESSONS_GLOBAL + " שיעורים";
   }
 
-  function copyTextToClipboard(text, onOk) {
-    function done() {
-      if (onOk) onOk();
+  function renderBonuses() {
+    var root = document.getElementById("bonus-list");
+    if (!root || !COURSE.bonuses) return;
+    var b = COURSE.bonuses;
+    var html =
+      '<h2 class="visually-hidden">' +
+      esc(b.title || "בונוסים") +
+      "</h2>";
+    for (var i = 0; i < (b.items || []).length; i++) {
+      var it = b.items[i];
+      html +=
+        '<div class="course-bonus-card">' +
+        "<h3>" +
+        esc(it.title) +
+        '</h3><pre class="course-bonus-pre">' +
+        esc(it.body) +
+        '</pre><button type="button" class="btn btn-secondary btn-copy" data-bonus-index="' +
+        i +
+        '">העתקה</button></div>';
     }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done).catch(function () {
-        fallbackCopyText(text, done);
-      });
-      return;
-    }
-    fallbackCopyText(text, done);
-  }
-
-  function fallbackCopyText(text, onOk) {
-    try {
-      var ta = document.createElement("textarea");
-      ta.value = text;
-      ta.setAttribute("readonly", "");
-      ta.style.position = "fixed";
-      ta.style.left = "-9999px";
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-      if (onOk) onOk();
-    } catch (e1) {
-      if (onOk) onOk();
-    }
-  }
-
-  function buildLessonPromptKitHtml(les) {
-    var blocks = [];
-    if (les.copyPrompts && les.copyPrompts.length) {
-      for (var ci = 0; ci < les.copyPrompts.length; ci++) {
-        var b = les.copyPrompts[ci];
-        if (b && b.text) blocks.push({ label: b.label || "העתק", text: b.text });
-      }
-    } else if (les.copyPrompt) {
-      blocks.push({ label: "העתק פרומפט", text: les.copyPrompt });
-    }
-    var hasCopy = blocks.length > 0;
-    if (!hasCopy && !les.pasteHint) return "";
-    var h = '<div class="course-prompt-kit">';
-    if (les.pasteHint) {
-      h +=
-        '<p class="course-paste-hint" role="status">' + escapeHtml(les.pasteHint) + "</p>";
-    } else if (hasCopy) {
-      h +=
-        '<p class="course-paste-hint" role="status">👉 עכשיו: לחצו ”העתק“, והדביקו ב-claude.ai לפי שלב השיעור.</p>';
-    }
-    for (var bi = 0; bi < blocks.length; bi++) {
-      h +=
-        '<div class="course-copy-row"><button type="button" class="btn course-btn-copy">' +
-        escapeHtml(blocks[bi].label) +
-        '</button><span class="course-copy-toast" hidden aria-live="polite">הועתק ✓</span></div>';
-    }
-    h += "</div>";
-    return h;
-  }
-
-  function buildLessonVerifyHtml(les, lessonId, alreadyDone) {
-    if (alreadyDone) return "";
-    var v = getEffectiveVerify(les);
-    var checks = getVerifyChecks(lessonId, v.items.length);
-    var allOk = true;
-    for (var ai = 0; ai < v.items.length; ai++) {
-      if (!checks[ai]) allOk = false;
-    }
-    var titleBlock =
-      v.title ||
-      'לפני "המשך" — האם הצליח?';
-    var h =
-      '<div class="course-lesson-verify" id="course-lesson-verify">' +
-      '<h2 class="course-lesson-verify-title">' +
-      escapeHtml(titleBlock) +
-      "</h2>" +
-      '<ul class="course-lesson-verify-list">';
-    for (var vi = 0; vi < v.items.length; vi++) {
-      var ck = checks[vi] ? " checked" : "";
-      h +=
-        '<li class="course-lesson-verify-item"><label class="course-verify-label"><input type="checkbox" class="course-verify-cb" data-vi="' +
-        vi +
-        '"' +
-        ck +
-        '> <span>' +
-        escapeHtml(v.items[vi]) +
-        "</span></label></li>";
-    }
-    h +=
-      "</ul>" +
-      '<p class="course-continue-gate-msg" id="course-continue-gate-msg" aria-live="polite"' +
-      (allOk ? " hidden" : "") +
-      ">יש לסמן את כל הסעיפים כדי ללחוץ על ”המשך“.</p>" +
-      "</div>";
-    return h;
-  }
-
-  function wireLessonPromptKit(les) {
-    var kit = document.querySelector(".course-prompt-kit");
-    if (!kit) return;
-    var texts = [];
-    if (les.copyPrompts && les.copyPrompts.length) {
-      for (var i = 0; i < les.copyPrompts.length; i++) {
-        if (les.copyPrompts[i] && les.copyPrompts[i].text) texts.push(les.copyPrompts[i].text);
-      }
-    } else if (les.copyPrompt) {
-      texts.push(les.copyPrompt);
-    }
-    var btns = kit.querySelectorAll(".course-btn-copy");
-    for (var j = 0; j < btns.length; j++) {
-      (function (idx) {
-        btns[idx].addEventListener("click", function () {
-          var t = texts[idx];
-          if (!t) return;
-          copyTextToClipboard(t, function () {
-            var row = btns[idx].closest(".course-copy-row");
-            var toast = row && row.querySelector(".course-copy-toast");
-            if (toast) {
-              toast.hidden = false;
-              setTimeout(function () {
-                toast.hidden = true;
-              }, 2000);
-            }
-          });
-        });
-      })(j);
-    }
-  }
-
-  function wireLessonVerification(les, lessonId, alreadyDone) {
-    if (alreadyDone) return;
-    var box = document.getElementById("course-lesson-verify");
-    if (!box) return;
-    var msg = document.getElementById("course-continue-gate-msg");
-    function syncContinue() {
-      var ok = allVerifyChecked(lessonId, les);
-      var btn = document.getElementById("course-btn-continue");
-      if (btn) {
-        btn.disabled = !ok;
-        btn.setAttribute("aria-disabled", ok ? "false" : "true");
-        btn.classList.toggle("is-gated", !ok);
-      }
-      if (msg) {
-        if (ok) msg.setAttribute("hidden", "");
-        else msg.removeAttribute("hidden");
-      }
-    }
-    box.querySelectorAll(".course-verify-cb").forEach(function (cb) {
-      cb.addEventListener("change", function () {
-        var ix = Number(cb.getAttribute("data-vi"));
-        setVerifyCheck(lessonId, ix, cb.checked);
-        syncContinue();
+    root.innerHTML = html;
+    root.querySelectorAll("[data-bonus-index]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var ix = parseInt(btn.getAttribute("data-bonus-index"), 10);
+        var item = COURSE.bonuses.items[ix];
+        if (item) copyPlain(item.body);
       });
     });
-    syncContinue();
-  }
-
-  function findLesson(lessonId) {
-    for (var mi = 0; mi < COURSE.modules.length; mi++) {
-      var m = COURSE.modules[mi];
-      for (var li = 0; li < m.lessons.length; li++) {
-        if (m.lessons[li].id === lessonId) return { module: m, lesson: m.lessons[li], moduleIndex: mi, lessonIndex: li };
-      }
-    }
-    return null;
-  }
-
-  function countGlobalDone() {
-    var c = getCompleted();
-    var n = 0;
-    Object.keys(c).forEach(function (k) {
-      if (c[k]) n++;
-    });
-    return n;
-  }
-
-  function countTrackDone(trackKey) {
-    var ids = TRACKS[trackKey].lessonIds;
-    var c = getCompleted();
-    var n = 0;
-    for (var i = 0; i < ids.length; i++) {
-      if (c[ids[i]]) n++;
-    }
-    return n;
-  }
-
-  function isIndexUnlocked(trackKey, index) {
-    var ids = TRACKS[trackKey].lessonIds;
-    var c = getCompleted();
-    for (var j = 0; j < index; j++) {
-      if (!c[ids[j]]) return false;
-    }
-    return true;
-  }
-
-  function firstIncompleteIndex(trackKey) {
-    var ids = TRACKS[trackKey].lessonIds;
-    var c = getCompleted();
-    for (var i = 0; i < ids.length; i++) {
-      if (!c[ids[i]]) return i;
-    }
-    return ids.length - 1;
-  }
-
-  function updateProgressBars() {
-    var globalDone = countGlobalDone();
-    var pctGlobal = Math.round((globalDone / TOTAL_LESSONS_GLOBAL) * 100);
-
-    var barG = $("#course-progress-bar-global-only");
-    var labG = $("#course-progress-label-global-only");
-    if (barG) barG.style.width = pctGlobal + "%";
-    if (labG) {
-      labG.textContent =
-        globalDone + " מתוך " + TOTAL_LESSONS_GLOBAL + " שיעורים בקורס (" + pctGlobal + "%)";
-    }
-
-    if (!currentTrackKey) return;
-
-    var trackDone = countTrackDone(currentTrackKey);
-    var pctTrack = Math.round((trackDone / TRACK_LEN) * 100);
-
-    var bar = $("#course-progress-bar-track");
-    var lt = $("#course-progress-label-track");
-    var lg = $("#course-progress-label-global");
-    if (bar) bar.style.width = pctTrack + "%";
-    if (lt) lt.textContent = trackDone + " מתוך " + TRACK_LEN + " שיעורים במסלול (" + pctTrack + "%)";
-    if (lg) lg.textContent = "בקורס המלא: " + globalDone + " מתוך " + TOTAL_LESSONS_GLOBAL + " שיעורים (" + pctGlobal + "%)";
-  }
-
-  function stopSpeech() {
-    if (speechProgressInterval !== null) {
-      clearInterval(speechProgressInterval);
-      speechProgressInterval = null;
-    }
-    var player = document.getElementById("course-audio-player");
-    if (player) player.classList.remove("is-playing");
-    var fill = document.getElementById("course-audio-progress-fill");
-    var timerEl = document.getElementById("course-speak-timer");
-    if (fill) fill.style.width = "0%";
-    if (timerEl) timerEl.textContent = "0 שנ׳";
-    try {
-      window.speechSynthesis.cancel();
-    } catch (e) {}
-  }
-
-  function waveformBarsMarkup(barCount) {
-    var pattern = [35, 58, 28, 72, 42, 65, 33, 78, 45, 52, 38, 68, 48, 55, 30, 75, 40, 62, 35, 70, 44, 50, 36, 66, 42, 58, 32, 74, 46, 54, 39, 64];
-    var parts = [];
-    for (var i = 0; i < barCount; i++) {
-      var pct = pattern[i % pattern.length];
-      parts.push('<span class="course-wave-bar" style="height:' + pct + '%"></span>');
-    }
-    return parts.join("");
-  }
-
-  function buildTaskCompareHtml(tc) {
-    if (!tc || (!tc.before && !tc.after)) return "";
-    var title = tc.title || "אותה משימה — לפני ואחרי";
-    var capB = tc.captionBefore || "לפני";
-    var capA = tc.captionAfter || "אחרי";
-    var altB = tc.altBefore || capB;
-    var altA = tc.altAfter || capA;
-    var h =
-      '<div class="course-task-compare">' +
-      '<h2 class="course-task-compare-title">' +
-      escapeHtml(title) +
-      "</h2>" +
-      '<div class="course-task-compare-grid">';
-    if (tc.before) {
-      h +=
-        '<figure class="course-task-compare-fig">' +
-        '<figcaption class="course-task-compare-cap">' +
-        escapeHtml(capB) +
-        '</figcaption><div class="course-task-compare-imgwrap"><img src="' +
-        escapeHtml(tc.before) +
-        '" alt="' +
-        escapeHtml(altB) +
-        '" loading="lazy" /></div></figure>';
-    }
-    if (tc.after) {
-      h +=
-        '<figure class="course-task-compare-fig">' +
-        '<figcaption class="course-task-compare-cap">' +
-        escapeHtml(capA) +
-        '</figcaption><div class="course-task-compare-imgwrap"><img src="' +
-        escapeHtml(tc.after) +
-        '" alt="' +
-        escapeHtml(altA) +
-        '" loading="lazy" /></div></figure>';
-    }
-    return h + "</div></div>";
-  }
-
-  function buildTryItHtml(les) {
-    if (!les.tryIt || !les.tryIt.htmlDefault) return "";
-    var ti = les.tryIt;
-    var title = ti.title || "נסו בעצמכם";
-    var sub =
-      ti.subtitle ||
-      "ערכו את הקוד ולחצו הרצה — כמו Try it Yourself ב-W3Schools.";
-    return (
-      '<div class="course-w3-tryit" id="course-w3-tryit">' +
-      '<div class="course-w3-header">' +
-      '<h2 class="course-w3-title">' +
-      escapeHtml(title) +
-      "</h2>" +
-      '<p class="course-w3-sub">' +
-      escapeHtml(sub) +
-      "</p></div>" +
-      '<div class="course-w3-toolbar">' +
-      '<button type="button" class="course-w3-run" id="course-w3-run">הרצה »</button>' +
-      '<label class="course-w3-live"><input type="checkbox" id="course-w3-live" checked /> עדכון חי</label>' +
-      "</div>" +
-      '<div class="course-w3-panes">' +
-      '<div class="course-w3-pane course-w3-pane-editor">' +
-      '<div class="course-w3-pane-label">HTML</div>' +
-      '<textarea class="course-w3-textarea" id="course-w3-editor" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="עריכת HTML"></textarea>' +
-      "</div>" +
-      '<div class="course-w3-pane course-w3-pane-result">' +
-      '<div class="course-w3-pane-label">תוצאה</div>' +
-      '<iframe class="course-w3-iframe" id="course-w3-iframe" title="תצוגה מקדימה" sandbox="allow-scripts"></iframe>' +
-      "</div></div></div>"
-    );
-  }
-
-  function buildLessonResourcesHtml(les) {
-    var list = les.resources;
-    if (!list || !list.length) return "";
-    var h =
-      '<div class="course-lesson-resources">' +
-      '<h2 class="course-lesson-resources-title">קישורים לפעולה</h2>' +
-      '<ul class="course-lesson-resources-list">';
-    for (var i = 0; i < list.length; i++) {
-      var r = list[i];
-      if (!r || !r.url) continue;
-      var lab = r.label || r.url;
-      h +=
-        '<li class="course-lesson-resources-item"><a class="course-lesson-external-link" href="' +
-        escapeHtml(r.url) +
-        '" target="_blank" rel="noopener noreferrer">' +
-        escapeHtml(lab) +
-        "</a>";
-      if (r.note) {
-        h +=
-          ' <span class="course-lesson-resources-note">— ' +
-          escapeHtml(r.note) +
-          "</span>";
-      }
-      h += "</li>";
-    }
-    h += "</ul></div>";
-    return h;
-  }
-
-  function initCourseTryIt(les) {
-    if (!les.tryIt || !les.tryIt.htmlDefault) return;
-    var ed = document.getElementById("course-w3-editor");
-    var iframe = document.getElementById("course-w3-iframe");
-    var run = document.getElementById("course-w3-run");
-    var live = document.getElementById("course-w3-live");
-    if (!ed || !iframe) return;
-    var debTimer = null;
-    function runPreview() {
-      try {
-        iframe.srcdoc = ed.value;
-      } catch (eRun) {
-        iframe.srcdoc =
-          "<!DOCTYPE html><html lang=\"he\" dir=\"rtl\"><body><p>שגיאה בתצוגה</p></body></html>";
-      }
-    }
-    ed.value = les.tryIt.htmlDefault;
-    runPreview();
-    if (run) run.addEventListener("click", runPreview);
-    if (live) {
-      ed.addEventListener("input", function () {
-        if (!live.checked) return;
-        if (debTimer) clearTimeout(debTimer);
-        debTimer = setTimeout(runPreview, 400);
-      });
-    }
-  }
-
-  function pickHebrewVoice() {
-    var voices = window.speechSynthesis.getVoices();
-    for (var i = 0; i < voices.length; i++) {
-      var l = (voices[i].lang || "").toLowerCase();
-      if (l.indexOf("he") === 0) return voices[i];
-    }
-    return null;
-  }
-
-  function lessonToSpeechText(found) {
-    var les = found.lesson;
-    return [
-      "שיעור: " + les.title + ".",
-      "מטרה: " + les.goal,
-      "מה רואים על המסך: " + les.onScreen,
-      "מה לעשות: " + les.youDo,
-      "תוצאה צפויה: " + les.outcome,
-      "משימה קטנה: " + les.task,
-    ].join(" ");
-  }
-
-  function speakLesson(found) {
-    if (!window.speechSynthesis) return;
-    stopSpeech();
-    var player = document.getElementById("course-audio-player");
-    var fill = document.getElementById("course-audio-progress-fill");
-    var timerEl = document.getElementById("course-speak-timer");
-    if (player) player.classList.add("is-playing");
-
-    var text = lessonToSpeechText(found);
-    var textLen = Math.max(1, text.length);
-    var u = new SpeechSynthesisUtterance(text);
-    u.lang = "he-IL";
-    var v = pickHebrewVoice();
-    if (v) u.voice = v;
-    u.rate = 0.92;
-
-    var estimatedSec = Math.max(14, textLen / (7.2 * u.rate));
-    var startMs = Date.now();
-    var boundaryPct = -1;
-
-    function syncSpeakUi() {
-      var elapsed = (Date.now() - startMs) / 1000;
-      var sec = Math.floor(elapsed);
-      if (timerEl) timerEl.textContent = sec + " שנ׳";
-      var timePct = Math.min(99.2, (elapsed / estimatedSec) * 100);
-      var pct =
-        boundaryPct >= 0 ? Math.max(boundaryPct, timePct) : timePct;
-      if (fill) fill.style.width = Math.min(100, pct) + "%";
-    }
-
-    u.onboundary = function (ev) {
-      if (typeof ev.charIndex === "number") {
-        boundaryPct = Math.min(100, (ev.charIndex / textLen) * 100);
-      }
-    };
-
-    speechProgressInterval = setInterval(syncSpeakUi, 120);
-
-    function finishSpeakingUi(keepTimer) {
-      if (speechProgressInterval !== null) {
-        clearInterval(speechProgressInterval);
-        speechProgressInterval = null;
-      }
-      if (player) player.classList.remove("is-playing");
-      if (!keepTimer) {
-        if (fill) fill.style.width = "0%";
-        if (timerEl) timerEl.textContent = "0 שנ׳";
-      } else {
-        if (fill) fill.style.width = "100%";
-        if (timerEl)
-          timerEl.textContent =
-            Math.max(0, Math.floor((Date.now() - startMs) / 1000)) + " שנ׳";
-      }
-    }
-
-    u.onend = function () {
-      finishSpeakingUi(true);
-    };
-    u.onerror = function () {
-      finishSpeakingUi(false);
-    };
-
-    window.speechSynthesis.speak(u);
-  }
-
-  function persistActiveLesson() {
-    var st = loadState();
-    st.activeTrack = currentTrackKey;
-    st.activeIndex = activeLessonIndex;
-    saveState(st);
   }
 
   function renderPlaylist() {
     var aside = document.getElementById("course-playlist");
-    if (!aside || !currentTrackKey) return;
-    var ids = TRACKS[currentTrackKey].lessonIds;
-    var c = getCompleted();
+    if (!aside) return;
+    var tr = getTrack();
+    if (!tr) return;
     var html = "";
-    html +=
-      '<p class="course-playlist-head"><strong>פלייליסט</strong> · ' +
-      TRACKS[currentTrackKey].label +
-      "</p>";
-    html += '<ol class="course-playlist-list" start="1">';
-    for (var i = 0; i < ids.length; i++) {
-      var lid = ids[i];
-      var unlocked = isIndexUnlocked(currentTrackKey, i);
-      var done = !!c[lid];
-      var isCurrent = i === activeLessonIndex;
-      var cls = "course-pl-item";
-      if (done) cls += " is-done";
-      if (isCurrent) cls += " is-current";
-      if (!unlocked) cls += " is-locked";
+    html += '<div class="course-playlist-banner" role="group" aria-label="פלייליסט">';
+    html += '<p class="course-playlist-banner-kicker">פלייליסט</p>';
+    html += '<p class="course-playlist-banner-row">';
+    html += '<span class="course-playlist-banner-dot" aria-hidden="true">·</span>';
+    html += '<span class="course-playlist-banner-track">' + esc(tr.label) + "</span>";
+    html += "</p></div>";
+    html += '<ul class="course-playlist-list">';
+    for (var i = 0; i < tr.lessonIds.length; i++) {
+      var lid = tr.lessonIds[i];
       var found = findLesson(lid);
       var title = found ? found.lesson.title : lid;
+      var unlocked = isLessonUnlocked(lid);
+      var done = state.completedLessonIds.indexOf(lid) !== -1;
+      var current = state.currentLessonId === lid;
+      var cls = "course-pl-item";
+      if (current) cls += " is-current";
+      if (done) cls += " is-done";
+      if (!unlocked) cls += " is-locked";
       html += '<li class="' + cls + '">';
       if (unlocked) {
         html +=
-          '<button type="button" class="course-pl-btn" data-idx="' +
-          i +
+          '<button type="button" class="course-pl-btn" data-lesson-id="' +
+          esc(lid) +
           '">' +
-          escapeHtml(title) +
-          (done ? " ✓" : "") +
+          esc(title) +
           "</button>";
       } else {
-        html +=
-          '<span class="course-pl-locked">' + escapeHtml(title) + " · נעול</span>";
+        html += '<span class="course-pl-locked">' + esc(title) + " (נעול)</span>";
       }
       html += "</li>";
     }
-    html += "</ol>";
+    html += "</ul>";
     html +=
-      '<p class="course-playlist-foot">' +
-      countTrackDone(currentTrackKey) +
-      " מתוך " +
-      TRACK_LEN +
-      " הושלמו במסלול</p>";
+      '<p class="course-playlist-foot">סימנו אימותים והמשיכו עם <strong>המשך לשיעור הבא</strong> לפתיחת השיעור הבא.</p>';
     aside.innerHTML = html;
-    aside.querySelectorAll(".course-pl-btn").forEach(function (b) {
-      b.addEventListener("click", function () {
-        var ix = Number(b.getAttribute("data-idx"));
-        if (!isIndexUnlocked(currentTrackKey, ix)) return;
-        activeLessonIndex = ix;
-        persistActiveLesson();
-        renderLessonStage();
-        renderPlaylist();
+    aside.querySelectorAll(".course-pl-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-lesson-id");
+        if (id && isLessonUnlocked(id)) {
+          state.currentLessonId = id;
+          saveState(state);
+          renderPlaylist();
+          renderLesson();
+        }
       });
     });
   }
 
-  function renderLessonStage() {
-    var stage = document.getElementById("course-lesson-inner");
-    if (!stage || !currentTrackKey) return;
-    var ids = TRACKS[currentTrackKey].lessonIds;
-    var lid = ids[activeLessonIndex];
-    var found = findLesson(lid);
-    if (!found) return;
-    var les = found.lesson;
-    var mod = found.module;
-    var c = getCompleted();
-    var isLast = activeLessonIndex >= ids.length - 1;
-    var done = !!c[lid];
-    var verifyOk = done || allVerifyChecked(lid, les);
-    var continueCls = "btn btn-primary btn-continue" + (verifyOk ? "" : " is-gated");
-    var continueDisabled = verifyOk ? "" : " disabled aria-disabled=\"true\"";
-    stage.innerHTML =
-      '<article class="course-lesson-article course-lesson-article-v2">' +
-      '<p class="course-lesson-breadcrumb">' +
-      escapeHtml(mod.title) +
-      '</p><p class="course-lesson-step-kicker">שיעור ' +
-      (activeLessonIndex + 1) +
-      " מתוך " +
-      TRACK_LEN +
-      '</p><h1 class="course-lesson-h1">' +
-      escapeHtml(les.title) +
-      "</h1>" +
-      '<p class="course-lesson-duration"><span class="course-time-badge">~' +
-      les.durationMin +
-      ' דק׳</span> קריאה או הקראה</p>' +
-      '<div class="course-lesson-grid course-lesson-grid-v2">' +
-      '<section class="course-block"><h2>מטרת השיעור</h2><p>' +
-      escapeHtml(les.goal) +
-      "</p></section>" +
-      '<section class="course-block"><h2>מה רואים על המסך</h2><p>' +
-      escapeHtml(les.onScreen) +
-      "</p></section>" +
-      '<section class="course-block"><h2>מה אתם עושים</h2><p>' +
-      escapeHtml(les.youDo) +
-      "</p></section>" +
-      '<section class="course-block course-block-accent"><h2>התוצאה בסוף</h2><p>' +
-      escapeHtml(les.outcome) +
-      "</p></section>" +
-      '<section class="course-block course-block-task"><h2>משימה קטנה</h2><p>' +
-      escapeHtml(les.task) +
-      "</p></section>" +
-      "</div>" +
-      buildLessonPromptKitHtml(les) +
-      buildLessonResourcesHtml(les) +
-      buildTaskCompareHtml(les.taskCompare) +
-      buildTryItHtml(les) +
-      buildLessonVerifyHtml(les, lid, done) +
-      '<div class="course-audio-row" id="course-audio-player">' +
-      '<div class="course-audio-wave-shell">' +
-      '<div class="course-waveform course-waveform--full" aria-hidden="true">' +
-      waveformBarsMarkup(56) +
-      "</div>" +
-      '<div class="course-audio-progress-line" aria-hidden="true">' +
-      '<div class="course-audio-progress-fill" id="course-audio-progress-fill"></div>' +
-      "</div>" +
-      "</div>" +
-      '<div class="course-audio-controls">' +
-      '<span class="course-audio-timer" id="course-speak-timer" aria-live="polite">0 שנ׳</span>' +
-      '<button type="button" class="btn course-audio-listen" id="course-btn-speak">האזן לשיעור</button>' +
-      '<button type="button" class="btn course-audio-stop" id="course-btn-stop-speak">עצירה</button>' +
-      "</div>" +
-      "</div>" +
-      '<div class="course-continue-row">' +
-      (done ? '<p class="course-continue-note">סימנתם את השיעור כהושלם ✓</p>' : "") +
-      '<button type="button" class="' +
-      continueCls +
-      '" id="course-btn-continue"' +
-      continueDisabled +
-      ">" +
-      (isLast ? "סיימתי — סיום המסלול" : "המשך לשיעור הבא") +
-      "</button>" +
-      "</div>" +
-      "</article>";
-    var btnSpeak = document.getElementById("course-btn-speak");
-    var btnStop = document.getElementById("course-btn-stop-speak");
-    var btnCont = document.getElementById("course-btn-continue");
-    if (btnSpeak) btnSpeak.addEventListener("click", function () { speakLesson(found); });
-    if (btnStop) btnStop.addEventListener("click", stopSpeech);
-    if (btnCont) {
-      btnCont.addEventListener("click", function () {
-        if (!done && !allVerifyChecked(lid, les)) return;
-        setLessonDone(lid, true);
-        updateProgressBars();
-        if (!isLast) {
-          activeLessonIndex++;
-          persistActiveLesson();
-          renderLessonStage();
-        } else {
-          renderLessonStageDone();
+  function renderLesson() {
+    var inner = document.getElementById("course-lesson-inner");
+    if (!inner) return;
+    stopSpeech();
+    var tr = getTrack();
+    if (!tr || !state.currentLessonId) {
+      inner.innerHTML = "";
+      refreshCourseAssistantSummary();
+      return;
+    }
+    var found = findLesson(state.currentLessonId);
+    if (!found) {
+      inner.innerHTML = "<p>שיעור לא נמצא.</p>";
+      refreshCourseAssistantSummary();
+      return;
+    }
+    var lesson = found.lesson;
+    var ix = trackIndex(lesson.id);
+
+    var html = '<article class="course-lesson-article-v2">';
+    if (ix >= 0) {
+      html +=
+        '<p class="course-lesson-step-kicker">שיעור ' +
+        (ix + 1) +
+        " מתוך " +
+        TRACK_LEN +
+        "</p>";
+    }
+    html += '<h1 class="course-lesson-h1">' + esc(lesson.title) + "</h1>";
+    if (lesson.durationMin) {
+      html +=
+        '<p class="course-lesson-duration"><span class="course-time-badge">זמן משוער</span> ' +
+        esc(String(lesson.durationMin)) +
+        " דק׳</p>";
+    }
+
+    html += '<div class="course-lesson-grid course-lesson-grid-v2">';
+    if (lesson.goal)
+      html +=
+        '<section class="course-block"><h2>מטרה</h2><p>' + esc(lesson.goal) + "</p></section>";
+    if (lesson.onScreen)
+      html +=
+        '<section class="course-block"><h2>במסך</h2><p>' + esc(lesson.onScreen) + "</p></section>";
+    if (lesson.youDo)
+      html +=
+        '<section class="course-block"><h2>מה עושים</h2><p>' + esc(lesson.youDo) + "</p></section>";
+    if (lesson.outcome)
+      html +=
+        '<section class="course-block course-block-accent"><h2>תוצאה</h2><p>' +
+        esc(lesson.outcome) +
+        "</p></section>";
+    if (lesson.task)
+      html +=
+        '<section class="course-block course-block-task"><h2>משימה</h2><p>' +
+        esc(lesson.task) +
+        "</p></section>";
+    html += "</div>";
+
+    if (lesson.taskCompare) {
+      var tc = lesson.taskCompare;
+      html += '<div class="course-task-compare">';
+      html += '<h3 class="course-task-compare-title">' + esc(tc.title || "לפני ואחרי") + "</h3>";
+      html += '<div class="course-task-compare-grid">';
+      html += '<figure class="course-task-compare-fig">';
+      html += '<figcaption class="course-task-compare-cap">' + esc(tc.captionBefore || "") + "</figcaption>";
+      html += '<div class="course-task-compare-imgwrap">';
+      html += '<img src="' + esc(tc.before) + '" alt="' + esc(tc.altBefore || "") + '" loading="lazy" />';
+      html += "</div></figure>";
+      html += '<figure class="course-task-compare-fig">';
+      html += '<figcaption class="course-task-compare-cap">' + esc(tc.captionAfter || "") + "</figcaption>";
+      html += '<div class="course-task-compare-imgwrap">';
+      html += '<img src="' + esc(tc.after) + '" alt="' + esc(tc.altAfter || "") + '" loading="lazy" />';
+      html += "</div></figure>";
+      html += "</div></div>";
+    }
+
+    inner.innerHTML = html;
+    var article = inner.querySelector(".course-lesson-article-v2");
+
+    if (lesson.copyPrompt || lesson.pasteHint || (lesson.copyPrompts && lesson.copyPrompts.length)) {
+      var kit = document.createElement("div");
+      kit.className = "course-prompt-kit";
+      var kitHtml = "";
+      if (lesson.pasteHint) kitHtml += '<p class="course-paste-hint">' + esc(lesson.pasteHint) + "</p>";
+      if (lesson.copyPrompt) {
+        kitHtml += '<div class="course-copy-row">';
+        kitHtml +=
+          '<button type="button" class="btn course-btn-copy" data-copy-once="1">העתקת פרומפט</button>';
+        kitHtml += '<span class="course-copy-toast" aria-live="polite"></span>';
+        kitHtml += "</div>";
+      }
+      if (lesson.copyPrompts) {
+        for (var ci = 0; ci < lesson.copyPrompts.length; ci++) {
+          var cp = lesson.copyPrompts[ci];
+          kitHtml += '<div class="course-copy-row">';
+          kitHtml +=
+            '<button type="button" class="btn course-btn-copy" data-copy-idx="' +
+            ci +
+            '">' +
+            esc(cp.label || "העתקה") +
+            "</button>";
+          kitHtml += '<span class="course-copy-toast" aria-live="polite"></span>';
+          kitHtml += "</div>";
         }
-        renderPlaylist();
+      }
+      kit.innerHTML = kitHtml;
+      article.appendChild(kit);
+
+      if (lesson.copyPrompt) {
+        var row = kit.querySelector("[data-copy-once]");
+        var toast = row.parentNode.querySelector(".course-copy-toast");
+        row.addEventListener("click", function () {
+          copyPlain(lesson.copyPrompt, toast);
+        });
+      }
+      kit.querySelectorAll("[data-copy-idx]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var ix = parseInt(btn.getAttribute("data-copy-idx"), 10);
+          var row = btn.closest(".course-copy-row");
+          var toast = row ? row.querySelector(".course-copy-toast") : null;
+          var cps = lesson.copyPrompts[ix];
+          if (cps && cps.text) copyPlain(cps.text, toast);
+        });
       });
     }
-    initCourseTryIt(les);
-    wireLessonPromptKit(les);
-    wireLessonVerification(les, lid, done);
-    var wrap = stage.closest(".course-lesson-stage");
-    if (wrap) {
-      try {
-        wrap.scrollIntoView({ behavior: "smooth", block: "start" });
-      } catch (e2) {}
+
+    if (lesson.resources && lesson.resources.length) {
+      var res = document.createElement("div");
+      res.className = "course-lesson-resources";
+      res.innerHTML =
+        '<h3 class="course-lesson-resources-title">קישורים</h3><ul class="course-lesson-resources-list"></ul>';
+      var ul = res.querySelector("ul");
+      for (var ri = 0; ri < lesson.resources.length; ri++) {
+        var r = lesson.resources[ri];
+        var li = document.createElement("li");
+        li.className = "course-lesson-resources-item";
+        li.innerHTML =
+          '<a class="course-lesson-external-link" href="' +
+          esc(r.url) +
+          '" target="_blank" rel="noopener noreferrer">' +
+          esc(r.label) +
+          "</a>";
+        if (r.note) {
+          var note = document.createElement("span");
+          note.className = "course-lesson-resources-note";
+          note.textContent = " · " + r.note;
+          li.appendChild(note);
+        }
+        ul.appendChild(li);
+      }
+      article.appendChild(res);
     }
+
+    if (lesson.verify && lesson.verify.items && lesson.verify.items.length) {
+      var ver = document.createElement("div");
+      ver.className = "course-lesson-verify";
+      var vchecks = getVerifyArray(lesson.id, lesson.verify.items.length);
+      var vh =
+        '<h3 class="course-lesson-verify-title">' +
+        esc(lesson.verify.title || "אימות") +
+        '</h3><ul class="course-lesson-verify-list">';
+      for (var vi = 0; vi < lesson.verify.items.length; vi++) {
+        vh +=
+          '<li class="course-lesson-verify-item"><label class="course-verify-label">';
+        vh +=
+          '<input type="checkbox" class="course-verify-cb" data-vi="' +
+          vi +
+          '" ' +
+          (vchecks[vi] ? "checked" : "") +
+          " />";
+        vh += "<span>" + esc(lesson.verify.items[vi]) + "</span></label></li>";
+      }
+      vh += "</ul>";
+      ver.innerHTML = vh;
+      article.appendChild(ver);
+      ver.querySelectorAll(".course-verify-cb").forEach(function (cb) {
+        cb.addEventListener("change", function () {
+          var i = parseInt(cb.getAttribute("data-vi"), 10);
+          var arr = getVerifyArray(lesson.id, lesson.verify.items.length);
+          arr[i] = cb.checked;
+          saveState(state);
+          updateContinueGate(lesson);
+        });
+      });
+    }
+
+    var audioRow = createLessonAudioRow();
+    article.appendChild(audioRow);
+    audioRow.querySelector("[data-action=speak]").addEventListener("click", function () {
+      startSpeechForLesson(lesson, audioRow);
+    });
+    audioRow.querySelector("[data-action=stop-speak]").addEventListener("click", stopSpeech);
+
+    var cont = document.createElement("div");
+    cont.className = "course-continue-row";
+    var gated = !allVerifyChecked(lesson);
+    var hasVerify = !!(lesson.verify && lesson.verify.items && lesson.verify.items.length);
+    cont.innerHTML =
+      (hasVerify
+        ? '<p class="course-continue-note">למעבר הלאה סמנו את כל סעיפי האימות בבלוק למעלה.</p>'
+        : '<p class="course-continue-note">לחצו המשך כשסיימתם את המשימה בשיעור.</p>') +
+      '<button type="button" class="btn btn-primary btn-continue' +
+      (gated ? " is-gated" : "") +
+      '" data-action="continue"' +
+      (gated ? ' disabled aria-disabled="true"' : "") +
+      ">המשך לשיעור הבא</button>" +
+      (gated && hasVerify
+        ? '<p class="course-continue-gate-msg">נא לסמן את כל הסעיפים כדי להמשיך.</p>'
+        : "");
+    article.appendChild(cont);
+
+    cont.querySelector("[data-action=continue]").addEventListener("click", function () {
+      if (!allVerifyChecked(lesson)) return;
+      advanceLesson();
+    });
+
+    updateContinueGate(lesson);
+    updateProgressUi();
+    refreshCourseAssistantSummary();
   }
 
-  function renderLessonStageDone() {
-    var stage = document.getElementById("course-lesson-inner");
-    if (!stage) return;
-    stage.innerHTML =
-      '<div class="course-done-card">' +
-      '<h2 class="course-done-title">כל הכבוד!</h2>' +
-      "<p>סיימתם את כל השיעורים ב" +
-      escapeHtml(TRACKS[currentTrackKey].label) +
-      '. אפשר לבחור מסלול אחר.</p><button type="button" class="btn btn-primary" id="course-done-another">בחירת מסלול</button></div>';
-    var b = document.getElementById("course-done-another");
-    if (b) b.addEventListener("click", showLevelPicker);
+  function updateContinueGate(lesson) {
+    var btn = document.querySelector(".btn-continue[data-action=continue]");
+    if (!btn || !lesson.verify || !lesson.verify.items || !lesson.verify.items.length) return;
+    var ok = allVerifyChecked(lesson);
+    btn.disabled = !ok;
+    btn.setAttribute("aria-disabled", ok ? "false" : "true");
+    btn.classList.toggle("is-gated", !ok);
+    var msg = document.querySelector(".course-continue-gate-msg");
+    if (msg) msg.style.display = ok ? "none" : "";
   }
 
-  function trackFullyDone(trackKey) {
-    var ids = TRACKS[trackKey].lessonIds;
-    var c = getCompleted();
-    for (var i = 0; i < ids.length; i++) {
-      if (!c[ids[i]]) return false;
+  function advanceLesson() {
+    var tr = getTrack();
+    if (!tr || !state.currentLessonId) return;
+    var lid = state.currentLessonId;
+    if (state.completedLessonIds.indexOf(lid) === -1) state.completedLessonIds.push(lid);
+    saveState(state);
+    var idx = tr.lessonIds.indexOf(lid);
+    renderPlaylist();
+    updateProgressUi();
+    if (idx < 0 || idx >= tr.lessonIds.length - 1) {
+      showTrackComplete();
+      return;
     }
-    return true;
+    state.currentLessonId = tr.lessonIds[idx + 1];
+    saveState(state);
+    renderPlaylist();
+    renderLesson();
   }
 
-  function showClassroom(trackKey) {
-    currentTrackKey = trackKey;
-    var st = loadState();
-    var fallbackIx = firstIncompleteIndex(trackKey);
-    activeLessonIndex = fallbackIx;
-    if (st.activeTrack === trackKey && typeof st.activeIndex === "number") {
-      var want = Math.min(Math.max(0, st.activeIndex), TRACK_LEN - 1);
-      if (isIndexUnlocked(trackKey, want)) activeLessonIndex = want;
-    }
+  function showTrackComplete() {
+    var inner = document.getElementById("course-lesson-inner");
+    if (!inner) return;
+    stopSpeech();
+    inner.innerHTML =
+      '<div class="course-done-card glass-card">' +
+      '<h2 class="course-done-title">סיימתם את המסלול 🎉</h2>' +
+      "<p>אפשר לעבור מסлול או לחזור לבחירת הרמה.</p>" +
+      '<button type="button" class="btn btn-primary" id="course-done-next">בחירת מסלול / רמה</button></div>';
+    document.getElementById("course-done-next").addEventListener("click", showEntry);
+  }
+
+  function showClassroom() {
     var entry = document.getElementById("course-entry");
     var room = document.getElementById("course-classroom");
+    var lbl = document.getElementById("course-track-label");
     if (entry) entry.hidden = true;
     if (room) room.hidden = false;
-    var lab = document.getElementById("course-track-label");
-    if (lab) lab.textContent = TRACKS[trackKey].label;
-    persistActiveLesson();
-    updateProgressBars();
+    if (lbl) lbl.textContent = "";
     renderPlaylist();
-    if (trackFullyDone(trackKey)) {
-      renderLessonStageDone();
-    } else {
-      renderLessonStage();
-    }
+    renderLesson();
+    updateProgressUi();
   }
 
-  function showLevelPicker() {
+  function showEntry() {
     stopSpeech();
-    currentTrackKey = null;
     var entry = document.getElementById("course-entry");
     var room = document.getElementById("course-classroom");
-    if (room) room.hidden = true;
+    state.trackId = null;
+    state.currentLessonId = null;
+    saveState(state);
     if (entry) entry.hidden = false;
-    updateProgressBars();
+    if (room) room.hidden = true;
+    updateProgressUi();
+    refreshCourseAssistantSummary();
   }
 
-  function wireLevelButtons() {
-    document.querySelectorAll(".course-level-card[data-track]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var t = btn.getAttribute("data-track");
-        if (TRACKS[t]) showClassroom(t);
-      });
-    });
-    var back = document.getElementById("course-back-levels");
-    if (back) back.addEventListener("click", showLevelPicker);
+  function pickTrack(trackId) {
+    if (!TRACKS[trackId]) return;
+    state.trackId = trackId;
+    state.currentLessonId = TRACKS[trackId].lessonIds[0];
+    saveState(state);
+    showClassroom();
   }
 
-  function renderBonuses() {
-    var el = document.getElementById("bonus-list");
+  function buildCourseSyllabusForTutor() {
+    var lines = [];
+    lines.push(COURSE.title || "קורס");
+    if (COURSE.subtitle) lines.push("תקציר: " + COURSE.subtitle);
+    for (var i = 0; i < COURSE.modules.length; i++) {
+      var m = COURSE.modules[i];
+      var head = "יחידה: " + m.title;
+      if (m.summary) head += " · " + m.summary;
+      lines.push(head);
+      for (var j = 0; j < m.lessons.length; j++) {
+        lines.push("  · " + m.lessons[j].title + " [" + m.lessons[j].id + "]");
+      }
+    }
+    return lines.join("\n");
+  }
+
+  function buildCurrentLessonContextBlock() {
+    if (!state.currentLessonId) {
+      return "התלמיד/ה במסך בחירת מסלול · עדיין לא נבחר שיעור ספציפי בלוח.";
+    }
+    var f = findLesson(state.currentLessonId);
+    if (!f) return "לא נמצא נתון שיעור.";
+    var L = f.lesson;
+    var parts = ["שם השיעור: " + L.title + " (" + L.id + ")."];
+    if (L.goal) parts.push("מטרה: " + L.goal);
+    if (L.durationMin) parts.push("זמן משוער בקורס: כ־" + L.durationMin + " דקות.");
+    return parts.join("\n");
+  }
+
+  function buildTutorSystemPrompt() {
+    var lines = [
+      "אתה עוזר הוראה הקשור אך ורק לקורס הדיגיטלי הבא. ענה תמיד בעברית, בצורה ברורה ומעשית.",
+      "",
+      "כללי התנהגות חובה:",
+      "• ענה רק על נושאים שקשורים ישירות לתוכן הקורס: בניית דף או אתר בסיסי בעזרת קלוד (claude.ai), פרומפטים, קבצים על המחשב, HTML ו־CSS בסיסי, תצוגה בדפדפן, דף נחיתה, תיקונים ושיפורים, התאמה למובייל, העלאה לאינטרנט, אחסון, דומיין ו־DNS בהקשר של הקורס, ושיטת עבודה שהקורס מלמד.",
+      "• אם השאלה אינה קשורה לקורס (רפואה, משפט, השקעות, פוליטיקה, נושאים אישיים, שיעורי בית למקצוע אחר וכו') · השב רק משפט אחד בעברית שאינך יכול לעזור בנושאים מחוץ לקורס, ובקש רק שאלה על תוכן הקורס.",
+      "• אל תמציא מחירים או תנאי שירות · כשמדובר במחירים או במגבלות ציין לבדוק בעמוד הרשמי של אנתרופיק או של ספק האחסון.",
+      "• אם חסר מידע טכני (שגיאה, קובץ, צילום מסך) · שאל את התלמיד/ה במפורש מה לבדוק, במקום לנחש.",
+      "",
+      "מפת תוכן הקורס (להקשר בלבד):",
+      buildCourseSyllabusForTutor(),
+      "",
+      "מיקום נוכחי בממשק הלמידה:",
+      buildCurrentLessonContextBlock(),
+    ];
+    if (state.trackId && TRACKS[state.trackId]) {
+      lines.push("מסלול שנבחר בממשק: " + TRACKS[state.trackId].label + ".");
+    }
+    return lines.join("\n") + PROMPT_HEBREW_SUFFIX;
+  }
+
+  function getChatApiUrl() {
+    if (typeof window !== "undefined" && window.COURSE_CHAT_API) return window.COURSE_CHAT_API;
+    return "/api/course-chat";
+  }
+
+  function formatChatApiError(data, httpStatus) {
+    var code = data && data.error;
+    var hintLines = [];
+    if (code === "server_missing_key") {
+      hintLines.push(
+        "הסבר: חסר משתנה סביבה ANTHROPIC_API_KEY בפרויקט (Vercel וכו')."
+      );
+    } else if (code === "upstream_error") {
+      hintLines.push(
+        "הסבר: Anthropic החזירה שגיאה · השדה detail ב־JSON למטה הוא ההודעה המדויקת מהם."
+      );
+    } else if (code === "bad_request") {
+      hintLines.push("הסבר: הבקשה לא עברה ולידציה בשרת (חסר system או messages).");
+    } else if (code === "bad_response") {
+      hintLines.push("הסבר: גוף התשובה מהשרת אינו JSON תקין.");
+    } else if (code === "proxy_failed") {
+      hintLines.push("הסבר: הפרוקסי נכשל בקריאה ל־Anthropic.");
+    } else if (code === "method_not_allowed") {
+      hintLines.push("הסבר: נשלחה שיטת HTTP שאינה POST.");
+    }
+    var statusNum =
+      httpStatus != null && httpStatus !== "" ? Number(httpStatus) : 0;
+    var jsonBlock = "";
+    try {
+      jsonBlock =
+        data && typeof data === "object"
+          ? JSON.stringify(data, null, 2)
+          : data != null
+            ? String(data)
+            : "(אין גוף JSON)";
+    } catch (e) {
+      jsonBlock = String(data);
+    }
+    var parts = [];
+    if (hintLines.length) parts.push(hintLines.join("\n"));
+    parts.push("HTTP: " + (statusNum || "?"));
+    parts.push("JSON מהשרת:");
+    parts.push(jsonBlock);
+    return parts.join("\n\n");
+  }
+
+  function renderAssistantMessages() {
+    var box = document.getElementById("course-assistant-messages");
+    if (!box) return;
+    box.innerHTML = "";
+    if (!assistantChatHistory.length) {
+      var empty = document.createElement("p");
+      empty.className = "course-assistant-empty";
+      empty.textContent =
+        "שאלו כאן על תוכן הקורס בלבד. השיחה שמורה בדפדפן בלבד עד שמנקים או מרעננים.";
+      box.appendChild(empty);
+    } else {
+      for (var i = 0; i < assistantChatHistory.length; i++) {
+        var m = assistantChatHistory[i];
+        var row = document.createElement("div");
+        row.className =
+          "course-assistant-msg " + (m.role === "user" ? "is-user" : "is-assistant");
+        var meta = document.createElement("span");
+        meta.className = "course-assistant-msg-role";
+        meta.textContent = m.role === "user" ? "אתם" : "עוזר הקורס";
+        var body = document.createElement("div");
+        body.className = "course-assistant-msg-text";
+        body.textContent = m.content;
+        row.appendChild(meta);
+        row.appendChild(body);
+        box.appendChild(row);
+      }
+    }
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function refreshCourseAssistantSummary() {
+    var el = document.getElementById("course-assistant-context");
     if (!el) return;
-    var html = "";
-    COURSE.bonuses.items.forEach(function (b) {
-      html +=
-        '<section class="course-bonus-card"><h3>' +
-        escapeHtml(b.title) +
-        '</h3><pre class="course-bonus-pre" dir="auto">' +
-        escapeHtml(b.body) +
-        '</pre><button type="button" class="btn btn-ghost btn-copy" data-copy>העתקה ללוח</button></section>';
+    if (!state.currentLessonId) {
+      el.textContent =
+        "מיקום נוכחי: מסך הבית של הקורס (בחירת מסלול). אחרי שתיכנסו לשיעור יוצג כאן שם השיעור.";
+      return;
+    }
+    var tr = getTrack();
+    var f = findLesson(state.currentLessonId);
+    if (!f) {
+      el.textContent = "";
+      return;
+    }
+    var parts = [];
+    if (tr) parts.push(tr.label);
+    parts.push(f.lesson.title);
+    el.textContent = "מיקום נוכחי: " + parts.join(" · ");
+  }
+
+  function initCourseAssistant() {
+    var root = document.getElementById("course-assistant");
+    var fab = document.getElementById("course-assistant-fab");
+    var input = document.getElementById("course-assistant-chat-input");
+    var sendBtn = document.getElementById("course-assistant-send");
+    var clearBtn = document.getElementById("course-assistant-clear-chat");
+    var errEl = document.getElementById("course-assistant-error");
+    if (!root || !fab) return;
+
+    renderAssistantMessages();
+
+    function openAssistant() {
+      root.classList.add("is-open");
+      root.setAttribute("aria-hidden", "false");
+      fab.setAttribute("aria-expanded", "true");
+      refreshCourseAssistantSummary();
+      renderAssistantMessages();
+      if (errEl) errEl.textContent = "";
+      try {
+        if (input) input.focus();
+      } catch (e) {}
+    }
+
+    function closeAssistant() {
+      root.classList.remove("is-open");
+      root.setAttribute("aria-hidden", "true");
+      fab.setAttribute("aria-expanded", "false");
+      if (errEl) errEl.textContent = "";
+    }
+
+    function trimHistory(h) {
+      var max = 24;
+      if (h.length <= max) return h;
+      return h.slice(h.length - max);
+    }
+
+    function sendAssistantChat() {
+      if (!input || !sendBtn) return;
+      var text = (input.value || "").trim();
+      if (!text || sendBtn.disabled) return;
+      if (errEl) errEl.textContent = "";
+
+      assistantChatHistory = trimHistory(assistantChatHistory);
+      assistantChatHistory.push({ role: "user", content: text });
+      input.value = "";
+      renderAssistantMessages();
+
+      var system = buildTutorSystemPrompt();
+      var payload = assistantChatHistory.map(function (m) {
+        return { role: m.role, content: m.content };
+      });
+
+      sendBtn.disabled = true;
+      var prevLabel = sendBtn.textContent;
+      sendBtn.textContent = "שולח…";
+
+      fetch(getChatApiUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system: system,
+          messages: payload,
+        }),
+      })
+        .then(function (r) {
+          return r.text().then(function (text) {
+            var data = null;
+            try {
+              data = text ? JSON.parse(text) : null;
+            } catch (e) {
+              var raw =
+                text != null && String(text).length > 20000
+                  ? String(text).slice(0, 20000) + "\n… (נחתך)"
+                  : String(text || "");
+              data = {
+                ok: false,
+                error: "bad_response",
+                detail: raw,
+              };
+            }
+            return { r: r, data: data };
+          });
+        })
+        .then(function (pair) {
+          var r = pair.r;
+          var data = pair.data;
+          if (!r.ok || !data || !data.ok) {
+            assistantChatHistory.pop();
+            renderAssistantMessages();
+            if (errEl) errEl.textContent = formatChatApiError(data, r.status);
+            return;
+          }
+          assistantChatHistory.push({
+            role: "assistant",
+            content:
+              data.text != null && String(data.text).trim() !== ""
+                ? String(data.text)
+                : "(התקבלה תשובה ריקה מהמודל · נסו לנסח שוב את השאלה.)",
+          });
+          assistantChatHistory = trimHistory(assistantChatHistory);
+          renderAssistantMessages();
+        })
+        .catch(function () {
+          assistantChatHistory.pop();
+          renderAssistantMessages();
+          if (errEl) errEl.textContent = "אין חיבור לשרת או שהבקשה נחסמה. אם פותחים קבצים מקומית (file://) צריך אחסון עם API.";
+        })
+        .then(function () {
+          sendBtn.disabled = false;
+          sendBtn.textContent = prevLabel;
+        });
+    }
+
+    fab.addEventListener("click", function () {
+      if (root.classList.contains("is-open")) closeAssistant();
+      else openAssistant();
     });
-    el.innerHTML = html;
-    el.querySelectorAll("[data-copy]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var pre = btn.previousElementSibling;
-        if (!pre || pre.tagName !== "PRE") return;
-        var text = pre.textContent || "";
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(
-            function () {
-              btn.textContent = "הועתק!";
-              setTimeout(function () {
-                btn.textContent = "העתקה ללוח";
-              }, 1600);
-            },
-            function () {}
-          );
+    var bannerOpen = document.getElementById("course-assistant-open-banner");
+    if (bannerOpen) {
+      bannerOpen.addEventListener("click", function () {
+        openAssistant();
+      });
+    }
+    if (sendBtn) sendBtn.addEventListener("click", sendAssistantChat);
+    if (clearBtn)
+      clearBtn.addEventListener("click", function () {
+        assistantChatHistory = [];
+        renderAssistantMessages();
+        if (errEl) errEl.textContent = "";
+      });
+    if (input) {
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendAssistantChat();
         }
       });
-    });
-  }
-
-  function wireResetProgressButton() {
-    var btn = document.getElementById("course-btn-reset-progress");
-    if (!btn) return;
-    btn.addEventListener("click", function () {
-      var ok = window.confirm(
-        "לאפס את כל ההתקדמות בשמירה המקומית?\n\nיימחקו: שיעורים שסומנו כהושלמו, סימוני אימות, ומקום בפלייליסט — רק בדפדפן הזה.\n\nלא ניתן לבטל."
-      );
-      if (!ok) return;
-      stopSpeech();
-      resetAllCourseProgress();
-      currentTrackKey = null;
-      activeLessonIndex = 0;
-      location.reload();
-    });
-  }
-
-  function initCourseShell() {
-    var brand = document.getElementById("course-brand-title");
-    if (brand) brand.textContent = COURSE.title;
-    wireResetProgressButton();
-    wireLevelButtons();
-    renderBonuses();
-    if (window.speechSynthesis) {
-      window.speechSynthesis.getVoices();
     }
-    updateProgressBars();
+    root.querySelectorAll("[data-close-assistant]").forEach(function (el) {
+      el.addEventListener("click", closeAssistant);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && root.classList.contains("is-open")) closeAssistant();
+    });
   }
 
   function init() {
-    stripResetProgressQuery();
-    initCourseShell();
+    renderBonuses();
+    var brand = document.getElementById("course-brand-title");
+    if (brand && COURSE.title) brand.textContent = COURSE.title;
+
+    document.querySelectorAll(".course-level-card[data-track]").forEach(function (card) {
+      card.addEventListener("click", function () {
+        pickTrack(card.getAttribute("data-track"));
+      });
+    });
+
+    var back = document.getElementById("course-back-levels");
+    if (back) back.addEventListener("click", showEntry);
+
+    var reset = document.getElementById("course-btn-reset-progress");
+    if (reset)
+      reset.addEventListener("click", function () {
+        if (!confirm("לאפס את כל ההתקדמות בדפדפן הזה?")) return;
+        try {
+          localStorage.removeItem(STATE_KEY);
+          localStorage.removeItem(PROGRESS_KEY_LEGACY);
+        } catch (e) {}
+        state = defaultState();
+        saveState(state);
+        stopSpeech();
+        var entry = document.getElementById("course-entry");
+        var room = document.getElementById("course-classroom");
+        if (entry) entry.hidden = false;
+        if (room) room.hidden = true;
+        renderPlaylist();
+        var inner = document.getElementById("course-lesson-inner");
+        if (inner) inner.innerHTML = "";
+        updateProgressUi();
+        refreshCourseAssistantSummary();
+      });
+
+    if (state.trackId && TRACKS[state.trackId] && state.currentLessonId) {
+      if (!isLessonUnlocked(state.currentLessonId)) {
+        state.currentLessonId = TRACKS[state.trackId].lessonIds[0];
+        saveState(state);
+      }
+      showClassroom();
+    } else {
+      updateProgressUi();
+    }
+
+    initCourseAssistant();
+    refreshCourseAssistantSummary();
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else init();
 })();

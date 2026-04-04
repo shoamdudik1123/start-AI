@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/course-chat.js": {
+      "maxDuration": 60
+    }
+  },
   "rewrites": [
     { "source": "/course", "destination": "/course.html" },
     { "source": "/course/", "destination": "/course.html" },
