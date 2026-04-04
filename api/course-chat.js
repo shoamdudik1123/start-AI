@@ -1,7 +1,9 @@
 /**
  * Vercel Serverless Function · נתיב: POST /api/course-chat
- * משתני סביבה: ANTHROPIC_API_KEY (חובה) · ANTHROPIC_MODEL (אופציונלי)
+ * משתני סביבה: ANTHROPIC_API_KEY (חובה) · ANTHROPIC_MODEL (אופציונלי, רק אם מחרוזת לא ריקה)
+ * ברירת מחדל: Claude Haiku 4.5 (מחליף את Haiku 3 שסולק / לא זמין)
  */
+var DEFAULT_ANTHROPIC_MODEL = "claude-haiku-4-5-20251001";
 function normalizeBody(req) {
   var body = req.body;
   if (body == null) return {};
@@ -61,8 +63,11 @@ async function courseChat(req, res) {
     return res.status(400).json({ ok: false, error: "bad_request" });
   }
 
+  var envModel = process.env.ANTHROPIC_MODEL;
   var model =
-    process.env.ANTHROPIC_MODEL || "claude-3-haiku-20240307";
+    envModel && String(envModel).trim()
+      ? String(envModel).trim()
+      : DEFAULT_ANTHROPIC_MODEL;
 
   var anthropicPayload = {
     model: model,

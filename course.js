@@ -80,6 +80,7 @@
 
   var state = loadState();
   var assistantChatHistory = [];
+  var courseAssistantWired = false;
 
   function findLesson(lessonId) {
     if (!courseDataReady || !COURSE.modules.length) return null;
@@ -840,6 +841,7 @@
   }
 
   function initCourseAssistant() {
+    if (courseAssistantWired) return;
     var root = document.getElementById("course-assistant");
     var fab = document.getElementById("course-assistant-fab");
     var input = document.getElementById("course-assistant-chat-input");
@@ -886,22 +888,54 @@
       input.value = "";
       renderAssistantMessages();
 
-      var system = buildTutorSystemPrompt();
-      var payload = assistantChatHistory.map(function (m) {
-        return { role: m.role, content: m.content };
-      });
+      var system;
+      try {
+        system = buildTutorSystemPrompt();
+      } catch (errPrep) {
+        assistantChatHistory.pop();
+        renderAssistantMessages();
+        if (errEl)
+          errEl.textContent =
+            "שגיאה בהכנת הבקשה: " +
+            (errPrep && errPrep.message ? String(errPrep.message) : String(errPrep));
+        return;
+      }
+
+      var payload;
+      try {
+        payload = assistantChatHistory.map(function (m) {
+          return { role: m.role, content: m.content };
+        });
+      } catch (errMap) {
+        assistantChatHistory.pop();
+        renderAssistantMessages();
+        if (errEl) errEl.textContent = "שגיאה בבניית ההודעות: " + String(errMap && errMap.message ? errMap.message : errMap);
+        return;
+      }
 
       sendBtn.disabled = true;
       var prevLabel = sendBtn.textContent;
       sendBtn.textContent = "שולח…";
 
+      var bodyJson;
+      try {
+        bodyJson = JSON.stringify({
+          system: system,
+          messages: payload,
+        });
+      } catch (errJson) {
+        assistantChatHistory.pop();
+        renderAssistantMessages();
+        if (errEl) errEl.textContent = "שגיאה בקידוד JSON לשליחה: " + String(errJson && errJson.message ? errJson.message : errJson);
+        sendBtn.disabled = false;
+        sendBtn.textContent = prevLabel;
+        return;
+      }
+
       fetch(getChatApiUrl(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system: system,
-          messages: payload,
-        }),
+        body: bodyJson,
       })
         .then(function (r) {
           return r.text().then(function (text) {
@@ -941,10 +975,20 @@
           assistantChatHistory = trimHistory(assistantChatHistory);
           renderAssistantMessages();
         })
-        .catch(function () {
+        .catch(function (netErr) {
           assistantChatHistory.pop();
           renderAssistantMessages();
-          if (errEl) errEl.textContent = "אין חיבור לשרת או שהבקשה נחסמה. אם פותחים קבצים מקומית (file://) צריך אחסון עם API.";
+          var detail =
+            netErr && netErr.message
+              ? netErr.message
+              : typeof netErr === "string"
+                ? netErr
+                : "";
+          if (errEl)
+            errEl.textContent =
+              "אין חיבור לשרת או שהבקשה נחסמה." +
+              (detail ? " (" + detail + ")" : "") +
+              " פותחים מ־file:// צריך אחסון עם API; ב־Vercel/Netlify ודאו ש־ANTHROPIC_API_KEY מוגדר.";
         })
         .then(function () {
           sendBtn.disabled = false;
@@ -983,6 +1027,8 @@
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && root.classList.contains("is-open")) closeAssistant();
     });
+
+    courseAssistantWired = true;
   }
 
   function showCourseDataLoadError() {
@@ -1006,6 +1052,8 @@
       showCourseDataLoadError();
       return;
     }
+
+    initCourseAssistant();
 
     document.querySelectorAll(".course-level-card[data-track]").forEach(function (card) {
       card.addEventListener("click", function () {
@@ -1047,17 +1095,25 @@
     var brand = document.getElementById("course-brand-title");
     if (brand && COURSE.title) brand.textContent = COURSE.title;
 
-    if (state.trackId && TRACKS[state.trackId] && state.currentLessonId) {
-      if (!isLessonUnlocked(state.currentLessonId)) {
-        state.currentLessonId = TRACKS[state.trackId].lessonIds[0];
-        saveState(state);
+    try {
+      if (state.trackId && TRACKS[state.trackId] && state.currentLessonId) {
+        if (!isLessonUnlocked(state.currentLessonId)) {
+          state.currentLessonId = TRACKS[state.trackId].lessonIds[0];
+          saveState(state);
+        }
+        showClassroom();
+      } else {
+        updateProgressUi();
       }
-      showClassroom();
-    } else {
+    } catch (e) {
+      console.error("אתחול הכיתה / showClassroom:", e);
       updateProgressUi();
+      var ae = document.getElementById("course-assistant-error");
+      if (ae && !ae.textContent)
+        ae.textContent =
+          "חלק מממשק הקורס לא נטען במלואו. הצ'אט אמור לעבוד; אם משהו חסר — רעננו את הדף. פרטים בקונסול.";
     }
 
-    initCourseAssistant();
     refreshCourseAssistantSummary();
   }
 
