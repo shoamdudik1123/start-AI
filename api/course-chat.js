@@ -35,10 +35,10 @@ function extractAnthropicText(data) {
 
 async function courseChat(req, res) {
   res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     return res.status(204).end();
   }
   if (req.method !== "POST") {
@@ -119,7 +119,13 @@ async function courseChat(req, res) {
     var text = extractAnthropicText(data);
     return res.status(200).json({ ok: true, text: text });
   } catch (e) {
-    return res.status(500).json({ ok: false, error: "proxy_failed" });
+    var errMsg =
+      e && typeof e.message === "string" ? e.message : String(e || "error");
+    return res.status(500).json({
+      ok: false,
+      error: "proxy_failed",
+      detail: errMsg,
+    });
   }
 }
 
