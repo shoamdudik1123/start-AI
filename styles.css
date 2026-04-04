@@ -2107,6 +2107,26 @@ body.nav-open .nav-toggle-bar:nth-child(3) {
   gap: 0.55rem;
 }
 
+.course-data-load-error {
+  margin: 0 0 1rem;
+  padding: 1rem 1.15rem;
+  border: 2px solid #f97316;
+  border-radius: 12px;
+  background: rgba(69, 26, 3, 0.55);
+  color: #ffedd5;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+.course-data-load-error code {
+  font-size: 0.88em;
+  padding: 0.08em 0.35em;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fed7aa;
+}
+
 /* ——— אזור קורס v2: רמות · פלייליסט · התקדמות · Heebo ——— */
 .course-page-v2,
 .course-page-v2 .btn,

@@ -30,9 +30,13 @@
   };
 
   var COURSE = window.COURSE;
-  if (!COURSE || !COURSE.modules) {
-    console.error("course-data.js חסר או לא תקין: ציפיתי ל־window.COURSE.modules");
-    return;
+  if (!COURSE || typeof COURSE !== "object") COURSE = {};
+  if (!Array.isArray(COURSE.modules)) COURSE.modules = [];
+  var courseDataReady = COURSE.modules.length > 0;
+  if (!courseDataReady) {
+    console.error(
+      "course-data.js חסר או לא תקין: ציפיתי ל־window.COURSE.modules עם שיעורים. בדקו בכרטיסיית רשת (Network) אם הקובץ נטען (סטטוס 200)."
+    );
   }
 
   function defaultState() {
@@ -78,6 +82,7 @@
   var assistantChatHistory = [];
 
   function findLesson(lessonId) {
+    if (!courseDataReady || !COURSE.modules.length) return null;
     for (var mi = 0; mi < COURSE.modules.length; mi++) {
       var mod = COURSE.modules[mi];
       for (var li = 0; li < mod.lessons.length; li++) {
@@ -685,6 +690,7 @@
   }
 
   function buildCourseSyllabusForTutor() {
+    if (!courseDataReady) return "(נתוני קורס לא נטענו)";
     var lines = [];
     lines.push(COURSE.title || "קורס");
     if (COURSE.subtitle) lines.push("תקציר: " + COURSE.subtitle);
@@ -759,6 +765,8 @@
       hintLines.push("הסבר: הפרוקסי נכשל בקריאה ל־Anthropic.");
     } else if (code === "method_not_allowed") {
       hintLines.push("הסבר: נשלחה שיטת HTTP שאינה POST.");
+    } else if (code === "invalid_json") {
+      hintLines.push("הסבר: גוף הבקשה לשרת אינו JSON תקין.");
     }
     var statusNum =
       httpStatus != null && httpStatus !== "" ? Number(httpStatus) : 0;
@@ -977,10 +985,27 @@
     });
   }
 
+  function showCourseDataLoadError() {
+    if (document.getElementById("course-data-load-error")) return;
+    var app = document.getElementById("course-app");
+    if (!app) return;
+    var div = document.createElement("div");
+    div.id = "course-data-load-error";
+    div.className = "course-data-load-error";
+    div.setAttribute("role", "alert");
+    div.innerHTML =
+      "<strong>לא נטענו נתוני הקורס.</strong> " +
+      "בדרך כלל <code>course-data.js</code> לא נטען (404 או חסימה). " +
+      "בכלי מפתחים ← רשת — ודאו שהקובץ חוזר עם סטטוס 200. " +
+      "אם נכנסתם דרך כתובת קוצרת (למשל <code>/course</code>) ועדיין כשל — נסו <code>course.html</code> ישירות.";
+    app.insertBefore(div, app.firstChild);
+  }
+
   function init() {
-    renderBonuses();
-    var brand = document.getElementById("course-brand-title");
-    if (brand && COURSE.title) brand.textContent = COURSE.title;
+    if (!courseDataReady) {
+      showCourseDataLoadError();
+      return;
+    }
 
     document.querySelectorAll(".course-level-card[data-track]").forEach(function (card) {
       card.addEventListener("click", function () {
@@ -1012,6 +1037,15 @@
         updateProgressUi();
         refreshCourseAssistantSummary();
       });
+
+    try {
+      renderBonuses();
+    } catch (e) {
+      console.error("renderBonuses:", e);
+    }
+
+    var brand = document.getElementById("course-brand-title");
+    if (brand && COURSE.title) brand.textContent = COURSE.title;
 
     if (state.trackId && TRACKS[state.trackId] && state.currentLessonId) {
       if (!isLessonUnlocked(state.currentLessonId)) {

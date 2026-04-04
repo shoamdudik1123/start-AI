@@ -2,9 +2,29 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
+  <script>
+    (function () {
+      var p = location.pathname || "/";
+      var href;
+      if (/\.html?$/i.test(p)) {
+        var i = p.lastIndexOf("/");
+        href = p.slice(0, i + 1) || "/";
+      } else {
+        var segs = p.split("/").filter(Boolean);
+        href = segs.length <= 1 ? "/" : "/" + segs.slice(0, -1).join("/") + "/";
+      }
+      var b = document.createElement("base");
+      b.href = href;
+      if (document.currentScript && document.currentScript.parentNode === document.head) {
+        document.head.insertBefore(b, document.currentScript);
+      } else {
+        document.head.insertBefore(b, document.head.firstChild.nextSibling);
+      }
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="description" content="אזור הקורס — שיעורים צעד אחר צעד עם מעקב התקדמות והקראה." />
+  <meta name="description" content="אזור הקורס · שיעורים צעד אחר צעד עם מעקב התקדמות והקראה." />
   <title>אזור הקורס | קוד קלוד למתחילים</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -29,16 +49,33 @@
     <div id="course-app" class="course-app course-app-v2">
       <div class="course-reset-toolbar glass-card" id="course-reset-toolbar">
         <button type="button" class="btn course-btn-reset-progress" id="course-btn-reset-progress">
-          איפוס התקדמות — התחלה מחדש
+          איפוס התקדמות · התחלה מחדש
         </button>
         <p class="course-reset-toolbar-note">מוחק את השמירה המקומית (שיעורים, אימותים, מקום בפלייליסט) רק בדפדפן הזה</p>
       </div>
+
+      <section class="course-assistant-promo glass-card" aria-label="עוזר הקורס" id="course-assistant-promo-bar">
+        <div class="course-assistant-promo-inner">
+          <div class="course-assistant-promo-text-block">
+            <span class="course-assistant-promo-badge">עוזר אישי לקורס</span>
+            <p class="course-assistant-promo-copy">
+              משהו לא היה ברור? יש
+              <strong>צ'אט AI מובנה</strong>
+              כאן באתר · ממוקד ב־<strong>תוכן הקורס בלבד</strong>, עם הקשר אוטומטי לשיעור שאתם נמצאים בו.
+            </p>
+          </div>
+          <button type="button" class="btn course-assistant-promo-btn" id="course-assistant-open-banner">
+            פתיחת עוזר הקורס
+          </button>
+        </div>
+      </section>
+
       <!-- בחירת רמה -->
       <section id="course-entry" class="course-entry glass-card">
         <p class="course-entry-eyebrow">ברוכים הבאים</p>
         <h1 class="course-entry-title" id="course-brand-title">קוד קלוד למתחילים</h1>
         <p class="course-entry-lead">
-          בחרו רמת פתיחה. בכל מסלול <strong>שמונה שיעורים</strong> ברצף — אחרי כל שיעור לוחצים <strong>המשך</strong>, וההתקדמות עולה.
+          בחרו רמת פתיחה. בכל מסלול <strong>שמונה שיעורים</strong> ברצף · אחרי כל שיעור לוחצים <strong>המשך</strong>, וההתקדמות עולה.
           בסוף המסלול תראו גם כמה סגרתם מכל <strong>24 שיעורי הקורס</strong>.
         </p>
         <div class="course-global-strip glass-card" aria-label="התקדמות בכל הקורס">
@@ -52,7 +89,7 @@
           <button type="button" class="course-level-card course-level-card--beginner" data-track="beginner">
             <span class="course-level-icon" aria-hidden="true">①</span>
             <span class="course-level-name">למתחילים</span>
-            <span class="course-level-desc">מנוי Claude בדפדפן (~20$ לחודש בדרך כלל מספיק), תיקייה וקבצים, זרימת טיוטה מכלי אחר ואז קלוד — בלי עורך בתשלום נפרד</span>
+            <span class="course-level-desc">מנוי קלוד בדפדפן (~20$ לחודש בדרך כלל מספיק), תיקייה וקבצים, זרימת טיוטה מכלי אחר ואז קלוד · בלי עורך בתשלום נפרד</span>
           </button>
           <button type="button" class="course-level-card course-level-card--mid" data-track="advanced">
             <span class="course-level-icon" aria-hidden="true">②</span>
@@ -66,7 +103,7 @@
           </button>
         </div>
         <p class="course-entry-foot">
-          <a class="course-inline-link" href="learn-tasks.html">תרגול נוסף — משימות צעד־אחר־צעד</a>
+          <a class="course-inline-link" href="learn-tasks.html">תרגול נוסף · משימות צעד־אחר־צעד</a>
         </p>
       </section>
 
@@ -89,7 +126,7 @@
         </div>
 
         <div class="course-classroom-grid">
-          <aside id="course-playlist" class="course-playlist glass-card" aria-label="רשימת שיעורים — פלייליסט"></aside>
+          <aside id="course-playlist" class="course-playlist glass-card" aria-label="רשימת שיעורים · פלייליסט"></aside>
           <div id="course-lesson-stage" class="course-lesson-stage glass-card">
             <div id="course-lesson-inner"></div>
           </div>
@@ -107,7 +144,56 @@
     <p>אזור הקורס · © <span id="year"></span> · <a class="course-inline-link" href="index.html">עמוד המכירה</a></p>
   </footer>
 
+  <div
+    id="course-assistant"
+    class="course-assistant"
+    aria-hidden="true"
+    aria-labelledby="course-assistant-title"
+  >
+    <div class="course-assistant-backdrop" data-close-assistant tabindex="-1"></div>
+    <div class="course-assistant-panel glass-card" role="dialog">
+      <button type="button" class="course-assistant-close btn btn-ghost" data-close-assistant aria-label="סגירה">
+        ✕
+      </button>
+      <h2 id="course-assistant-title" class="course-assistant-title">עוזר הקורס · צ'אט AI</h2>
+      <p class="course-assistant-lead">
+        שלחו שאלה וקבלו תשובה <strong>בתוך האתר</strong>. העוזר מוגבל לנושאים <strong>מהקורס בלבד</strong>.
+        הפניה ל־AI רצה דרך שרת (מפתח API לא נחשף בדפדפן). אחרי העלאה לאחסון יש להגדיר
+        <code class="course-assistant-code">ANTHROPIC_API_KEY</code>
+        אצל מפעיל האתר (Vercel / Netlify וכו').
+      </p>
+      <p id="course-assistant-context" class="course-assistant-context" aria-live="polite"></p>
+      <div id="course-assistant-messages" class="course-assistant-messages" aria-live="polite"></div>
+      <p id="course-assistant-error" class="course-assistant-error" role="alert"></p>
+      <div class="course-assistant-composer">
+        <label class="visually-hidden" for="course-assistant-chat-input">הודעה לעוזר</label>
+        <textarea
+          id="course-assistant-chat-input"
+          class="course-assistant-chat-input"
+          rows="3"
+          placeholder="שאלו על מה שלמדתם בקורס… (Enter לשליחה, Shift+Enter לשורה חדשה)"
+        ></textarea>
+        <div class="course-assistant-composer-actions">
+          <button type="button" class="btn btn-ghost" id="course-assistant-clear-chat">שיחה חדשה</button>
+          <button type="button" class="btn btn-primary" id="course-assistant-send">שליחה</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button
+    type="button"
+    id="course-assistant-fab"
+    class="course-assistant-fab btn"
+    aria-expanded="false"
+    aria-controls="course-assistant"
+  >
+    <span class="course-assistant-fab-icon" aria-hidden="true">✦</span>
+    עוזר הקורס
+  </button>
+
   <script src="script.js"></script>
+  <script src="course-ai-config.js"></script>
+  <script src="course-data.js"></script>
   <script src="course.js"></script>
 </body>
 </html>
